@@ -46,7 +46,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 - Load the project in Visual Studio Code
 - Open appsettings.json
-- Under 'AzureAd' section replace <tenantid> in 'ValidIssuers' with your Azure AD tenant ID
+- Under 'AzureAd' section replace \<tenantid\> in 'ValidIssuers' with your Azure AD tenant ID
 - Under 'TestKeys' section modify the following:
     - Change the 'Name' value
     - Change the 'Id' value to contain a GUID
