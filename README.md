@@ -56,10 +56,6 @@ Outline the file contents of the repository. It helps users navigate the codebas
     - Modify the value of 'PrivatePem' to be a valid private key in PEM format
 - Go to Debug -> Start Debugging
 
-## Key concepts
-
-Provide users with more context on the tools and services used in the sample. Explain some of the code that is being used and how services interact with each other.
-
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
