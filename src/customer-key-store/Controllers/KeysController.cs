@@ -34,7 +34,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
             {                
                 var publicKey = mKeyManager.GetPublicKey(GetRequestUri(Request), keyName);
 
-                return Json(publicKey);
+                return Ok(publicKey);
             }
             catch(Exception e)
             {
@@ -50,7 +50,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
             {
                 var decryptedData = mKeyManager.Decrypt(HttpContext.User, keyName, keyId, encryptedData);
 
-                return Json(decryptedData);
+                return Ok(decryptedData);
             }
             catch(Exception e)
             {
