@@ -28,7 +28,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
         }
         
         [HttpGet]
-        public IActionResult Key(string keyName)
+        public IActionResult GetKey(string keyName)
         {
             try
             {                

@@ -92,7 +92,7 @@ namespace customerkeystore
                 routes.MapRoute(
                     name: "GetKeyRoute",
                     template: "{keyName}",
-                    defaults: new { controller = "Keys", action = "Key" });                    
+                    defaults: new { controller = "Keys", action = "GetKey" });
             });
         }
     }

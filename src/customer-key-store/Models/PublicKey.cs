@@ -5,6 +5,8 @@ using System.Web;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
+    //The classes in this file implement the format of public key data returned for a key
+    //Changing the returned data can break consuming clients
     public class KeyData
     {
         public KeyData(PublicKey key, Cache cache)

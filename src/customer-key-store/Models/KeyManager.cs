@@ -15,11 +15,11 @@ namespace Microsoft.InformationProtection.Web.Models
         public KeyData GetPublicKey(Uri requestUri, string keyName)
         {
             var key = mKeyStore.GetActiveKey(keyName);
-            var publicKey = key.GetKey().GetPublicKey();
+            var publicKey = key.Key.GetPublicKey();
 
-            publicKey.kid = requestUri.GetLeftPart(UriPartial.Path) + "/" + key.GetKeyId();
-            publicKey.kty = key.GetKeyType();
-            publicKey.alg = key.GetSupportedAlgorithm();
+            publicKey.kid = requestUri.GetLeftPart(UriPartial.Path) + "/" + key.KeyId;
+            publicKey.kty = key.KeyType;
+            publicKey.alg = key.SupportedAlgorithm;
 
             var exp = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss");
 
@@ -30,14 +30,14 @@ namespace Microsoft.InformationProtection.Web.Models
         {
             var keyData = mKeyStore.GetKey(keyName, keyId);
 
-            keyData.GetKeyAuth().CanUserAccessKey(user, keyData);
+            keyData.KeyAuth.CanUserAccessKey(user, keyData);
 
             if (encryptedData.alg != "RSA-OAEP-256")
             {
                 throw new Exception(encryptedData.alg + " is not supported");
             }
             
-            var decryptedData = keyData.GetKey().Decrypt(Convert.FromBase64String(encryptedData.value));
+            var decryptedData = keyData.Key.Decrypt(Convert.FromBase64String(encryptedData.value));
 
             return new DecryptedData(Convert.ToBase64String(decryptedData));
         } 

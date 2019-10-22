@@ -19,11 +19,11 @@ namespace Microsoft.InformationProtection.Web.Models
             mKeyAuth = keyAuth;
         }
 
-        public Key GetKey() { return mKey; }
-        public string GetKeyId() { return mKeyId; }
-        public string GetKeyType() { return mKeyType; }
-        public string GetSupportedAlgorithm() { return mSupportedAlgorithm; }
-        public Authorizer GetKeyAuth() { return mKeyAuth; }
+        public Key Key { get { return mKey; } }
+        public string KeyId { get { return mKeyId; } }
+        public string KeyType { get { return mKeyType; } }
+        public string SupportedAlgorithm { get { return mSupportedAlgorithm; } }
+        public Authorizer KeyAuth { get { return mKeyAuth; } }
 
     }
 }

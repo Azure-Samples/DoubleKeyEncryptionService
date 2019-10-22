@@ -25,32 +25,22 @@ namespace Microsoft.InformationProtection.Web.Models
 
         private string GetRole(string memberOf)
         {
-            int commaIndex = 0;
             string role = string.Empty;
-            bool roleFound = false;
-            var memberOfLength = memberOf.Length;
-            do
+            var splitStrings = memberOf.Split(",");
+
+            for(int index = 0; index < splitStrings.Length; index++)
             {
-                var newCommaIndex = memberOf.IndexOf(",", commaIndex);
-
-                if(newCommaIndex != -1)
+                role += splitStrings[index];
+                if(role.Length == 0 || role[role.Length - 1] != '\\')
                 {
-                    if(newCommaIndex == 0 || memberOf[newCommaIndex - 1] != '\\')
-                    {
-                        role += memberOf.Substring(commaIndex, newCommaIndex - commaIndex);
-                        roleFound = true;
-                    }
-                    else
-                    {
-                        //Found a delimited comma, skip over and continue searching
-                        role += memberOf.Substring(commaIndex, newCommaIndex - commaIndex - 1) + ",";
-                        newCommaIndex++;
-                    }
+                    break;
                 }
-
-                commaIndex = newCommaIndex;
+                else
+                {
+                    //Delimited comma is present, remove the delimiter (\) and add the comma back. Continue searching
+                    role = role.Substring(0, role.Length - 1) + ",";
+                }
             }
-            while(commaIndex > 0 && commaIndex < memberOfLength && !roleFound);
 
             return role;
         }
