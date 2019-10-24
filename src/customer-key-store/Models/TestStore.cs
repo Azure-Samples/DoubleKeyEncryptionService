@@ -5,15 +5,14 @@ using Microsoft.Extensions.Configuration.Binder;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
-    public class TestKeyStore : KeyStore
+    public class TestKeyStore : IKeyStore
     {
 
-        private Dictionary<string, Dictionary<string, KeyStoreData>> mKeys = new Dictionary<string, Dictionary<string, KeyStoreData>>();
-        private Dictionary<string, string> mActiveKeys = new Dictionary<string, string>();
-        private IConfiguration mConfiguration;
+        private Dictionary<string, Dictionary<string, KeyStoreData>> keys = new Dictionary<string, Dictionary<string, KeyStoreData>>();
+        private Dictionary<string, string> activeKeys = new Dictionary<string, string>();
 
-        private const string kKeyType = "RSA";
-        private const string kAlgorithm = "RS256";
+        private const string keyType = "RSA";
+        private const string algorithm = "RS256";
 
         private void CreateTestKey(
             string keyName, 
@@ -22,42 +21,55 @@ namespace Microsoft.InformationProtection.Web.Models
             string privateKey,
             string keyType,
             string algorithm,
-            Authorizer keyAuth)
+            IAuthorizer keyAuth,
+            int? expirationTimeInDays)
         {
             if(keyAuth == null)
             {
-                throw new Exception("An authorizer must be specified for a key");
+                throw new ArgumentException("An authorizer must be specified for a key");
             }
 
-            mKeys.Add(keyName, new Dictionary<string, KeyStoreData>());
+            keys.Add(keyName, new Dictionary<string, KeyStoreData>());
 
-            mKeys[keyName][keyId] = new KeyStoreData(
+            keys[keyName][keyId] = new KeyStoreData(
                                                 new TestKey(publicKey, privateKey),
                                                 keyId,
                                                 keyType,
                                                 algorithm,
-                                                keyAuth);
+                                                keyAuth,
+                                                expirationTimeInDays);
 
-            if(!mActiveKeys.ContainsKey(keyName))   //Multiple keys with the same name can be in the app settings, the first one for the current name is active, the rest have been rolled
+            if(!activeKeys.ContainsKey(keyName))   //Multiple keys with the same name can be in the app settings, the first one for the current name is active, the rest have been rolled
             {
-                mActiveKeys[keyName] = keyId;
+                activeKeys[keyName] = keyId;
             }
         }
 
         public TestKeyStore(IConfiguration configuration)
         {
-            mConfiguration = configuration;
-            var testKeysSection = mConfiguration.GetSection("TestKeys");
-            Authorizer keyAuth = null;
+            var testKeysSection = configuration.GetSection("TestKeys");
+            IAuthorizer keyAuth = null;
+
+            if(!testKeysSection.Exists())
+            {
+              throw new System.ArgumentException("TestKeys section does not exist");
+            }
             
             foreach(var testKey in testKeysSection.GetChildren())
             {
                 List<string> roles = new List<string>();
                 var validRoles = testKey.GetSection("AuthorizedRoles");
                 var validEmails = testKey.GetSection("AuthorizedEmailAddress");
+
+                if(validRoles != null && validRoles.Exists() &&
+                   validEmails != null && validEmails.Exists()) 
+                {
+                    throw new System.ArgumentException("Both role and email authorizers cannot be used on the same test key");
+                }
+
                 if(validRoles != null && validRoles.Exists())
                 {
-                    RoleAuthorizer roleAuth = new RoleAuthorizer(mConfiguration);
+                    RoleAuthorizer roleAuth = new RoleAuthorizer(configuration);
                     keyAuth = roleAuth;
                     foreach(var role in validRoles.GetChildren())
                     {
@@ -74,14 +86,47 @@ namespace Microsoft.InformationProtection.Web.Models
                     }                    
                 }
 
+                int? expirationTimeInDays = null;
+                var cacheTime = testKey["CacheExpirationInDays"];
+                if(cacheTime != null)
+                {
+                    expirationTimeInDays = Convert.ToInt32(cacheTime);
+                }
+                
+                var name = testKey["Name"];
+                var id = testKey["Id"];
+                var publicPem = testKey["PublicPem"];
+                var privatePem = testKey["PrivatePem"];
+
+                if(name == null)
+                {
+                  throw new System.ArgumentException("The key must have a name");
+                }
+
+                if(id == null)
+                {
+                  throw new System.ArgumentException("The key must have an id");
+                }
+
+                if(publicPem == null)
+                {
+                  throw new System.ArgumentException("The key must have a publicPem");
+                }
+
+                if(privatePem == null)
+                {
+                  throw new System.ArgumentException("The key must have a privatePem");
+                }                                                
+
                 CreateTestKey(
-                    testKey["Name"], 
-                    testKey["Id"], 
-                    testKey["PublicPem"], 
-                    testKey["PrivatePem"], 
-                    kKeyType, 
-                    kAlgorithm, 
-                    keyAuth);
+                    name,
+                    id, 
+                    publicPem, 
+                    privatePem, 
+                    keyType, 
+                    algorithm, 
+                    keyAuth,
+                    expirationTimeInDays);
             }
         }
 
@@ -90,10 +135,10 @@ namespace Microsoft.InformationProtection.Web.Models
             Dictionary<string, KeyStoreData> keys;
             string activeKey;
             KeyStoreData foundKey;
-            if(!mKeys.TryGetValue(keyName, out keys) || !mActiveKeys.TryGetValue(keyName, out activeKey) ||
+            if(!this.keys.TryGetValue(keyName, out keys) || !activeKeys.TryGetValue(keyName, out activeKey) ||
                     !keys.TryGetValue(activeKey, out foundKey))
             {
-                throw new Exception("Key " + keyName + " not found");
+                throw new ArgumentException("Key " + keyName + " not found");
             }
 
             return foundKey;
@@ -103,10 +148,10 @@ namespace Microsoft.InformationProtection.Web.Models
         {
             Dictionary<string, KeyStoreData> keys;
             KeyStoreData foundKey;
-            if(!mKeys.TryGetValue(keyName, out keys) ||
+            if(!this.keys.TryGetValue(keyName, out keys) ||
                     !keys.TryGetValue(keyId, out foundKey))
             {
-                throw new Exception("Key " + keyName + "-" + keyId + " not found");
+                throw new ArgumentException("Key " + keyName + "-" + keyId + " not found");
             }
 
             return foundKey;

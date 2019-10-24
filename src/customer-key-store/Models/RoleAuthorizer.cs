@@ -5,28 +5,31 @@ using System.Collections.Generic;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
-    public class RoleAuthorizer : Authorizer
+    public class RoleAuthorizer : IAuthorizer
     {
-        const string kSIDClaim = "onprem_sid";
-        const string kRoleProperty = "memberof";
+        const string sidClaim = "onprem_sid";
+        const string roleProperty = "memberof";
 
-        private IConfiguration mConfiguration;
-        private HashSet<string> mRoles = new HashSet<string>();
+        private string ldapPath;
+        private HashSet<string> roles = new HashSet<string>();
 
         public RoleAuthorizer(IConfiguration configuration)
         {
-            mConfiguration = configuration;
+            ldapPath = configuration["RoleAuthorizer:LDAPPath"];
         }
 
         public void AddRole(string role)
         {
-            mRoles.Add(role);
+            roles.Add(role);
         }
 
         private string GetRole(string memberOf)
         {
             string role = string.Empty;
             var splitStrings = memberOf.Split(",");
+
+            //This function obtains the first string in a comma separated string of strings
+            //A comma can be delimited by a \ and in that case it should continue searching
 
             for(int index = 0; index < splitStrings.Length; index++)
             {
@@ -50,12 +53,12 @@ namespace Microsoft.InformationProtection.Web.Models
             bool success = false;
             bool claimFound = false;
             
-            DirectoryEntry entry = new DirectoryEntry("LDAP://" + mConfiguration["RoleAuthorizer:LDAPPath"]);
+            DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath);
             DirectorySearcher Dsearch = new DirectorySearcher(entry);
 
             foreach(var claim in user.Claims)
             {
-                if(claim.Type == kSIDClaim)
+                if(claim.Type == sidClaim)
                 {
                     claimFound = true;
                     Dsearch.Filter = "(objectSid=" + claim.Value + ")";
@@ -65,22 +68,22 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(!claimFound)
             {
-                throw new System.Exception(kSIDClaim + " claim not found");
+                throw new System.ArgumentException(sidClaim + " claim not found");
             }            
 
             var result = Dsearch.FindOne();
 
             if(result == null)
             {
-                throw new System.Exception("User not found");
+                throw new System.ArgumentException("User not found");
             }
 
-            var memberof = result.Properties[kRoleProperty];
+            var memberof = result.Properties[roleProperty];
             foreach(var member in memberof)
             {
                 //Split out the first part of the role to the comma
                 var role = GetRole(member.ToString());
-                if(mRoles.Contains(role))
+                if(roles.Contains(role))
                 {
                     success = true;
                     break;
@@ -89,7 +92,7 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(!success)
             {
-                throw new System.Exception("User does not have access to the key");
+                throw new System.ArgumentException("User does not have access to the key");
             }
         }
     }

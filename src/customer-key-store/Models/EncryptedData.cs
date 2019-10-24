@@ -9,7 +9,10 @@ namespace Microsoft.InformationProtection.Web.Models
     //Changes in the format will break consuming clients  
     public class EncryptedData
     {
-        public string alg { get; set; }
-        public string value { get; set; }
+        [Newtonsoft.Json.JsonProperty("alg")]
+        public string Algorithm { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("value")]
+        public string Value { get; set; }
     }
 }

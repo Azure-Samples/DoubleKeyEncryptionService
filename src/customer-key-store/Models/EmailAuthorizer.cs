@@ -4,15 +4,15 @@ using System.Collections.Generic;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
-    public class EmailAuthorizer : Authorizer
+    public class EmailAuthorizer : IAuthorizer
     {
-        const string kEmailClaim = ClaimTypes.Email;
-        const string kUpnClaim = ClaimTypes.Upn;
-        private HashSet<string> mValidEmails = new HashSet<string>();
+        const string emailClaim = ClaimTypes.Email;
+        const string upnClaim = ClaimTypes.Upn;
+        private HashSet<string> validEmails = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
         public void AddEmail(string email)
         {
-            mValidEmails.Add(email);
+            validEmails.Add(email.Trim());
         }
 
         public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
@@ -21,12 +21,12 @@ namespace Microsoft.InformationProtection.Web.Models
 
             foreach(var claim in user.Claims)
             {
-                if(claim.Type == kEmailClaim)
+                if(claim.Type == emailClaim)
                 {
                     email = claim.Value;
                     break;
                 }
-                else if(claim.Type == kUpnClaim)
+                else if(claim.Type == upnClaim)
                 {
                     email = claim.Value;
                     break;
@@ -35,12 +35,12 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(email == null)
             {
-                throw new System.Exception("The email or upn claim is required");
+                throw new System.ArgumentException("The email or upn claim is required");
             }
 
-            if(!mValidEmails.Contains(email.Trim().ToLower()))
+            if(!validEmails.Contains(email.Trim()))
             {
-                throw new System.Exception("User does not have access to the key");
+                throw new System.ArgumentException("User does not have access to the key");
             }
         }
     }

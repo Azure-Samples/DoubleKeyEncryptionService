@@ -2,54 +2,64 @@ using System;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
-    public class TestKey : Key
+    public class TestKey : IKey
     {
-        private static readonly string kPublicKey =
+        private static readonly string publicKeyFormatter =
 @"-----BEGIN PUBLIC KEY-----
 {0}
 -----END PUBLIC KEY-----";
 
-        private static readonly string kPrivateKey = 
+        private static readonly string privateKeyFormatter = 
 @"-----BEGIN RSA PRIVATE KEY-----
 {0}
 -----END RSA PRIVATE KEY-----";
 
-        private string mPublicKey;
-        private string mPrivateKey;
+        private string publicKey;
+        private string privateKey;
+        private PublicKey storedPublicKey = null;
+        Org.BouncyCastle.Crypto.Encodings.OaepEncoding encryptEngine = null;
 
         public TestKey(string publicKey, string privateKey)
         {
-            mPublicKey = String.Format(kPublicKey, publicKey);
-            mPrivateKey = String.Format(kPrivateKey, privateKey);
+            this.publicKey = string.Format(publicKeyFormatter, publicKey);
+            this.privateKey = string.Format(privateKeyFormatter, privateKey);
         }
         
         public PublicKey GetPublicKey()
         {
-            Org.BouncyCastle.OpenSsl.PemReader pr = 
-                new Org.BouncyCastle.OpenSsl.PemReader(
-                        new System.IO.StringReader(mPublicKey));
+            if(storedPublicKey == null) 
+            {
+                Org.BouncyCastle.OpenSsl.PemReader pr = 
+                    new Org.BouncyCastle.OpenSsl.PemReader(
+                            new System.IO.StringReader(publicKey));
 
-            Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters KeyParams 
-                = (Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters)pr.ReadObject();
+                Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters KeyParams 
+                    = (Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters)pr.ReadObject();
 
-            var RSAKeyInfo = Org.BouncyCastle.Security.DotNetUtilities.ToRSAParameters(KeyParams);
-            var exponent = ByteArrayToUInt(RSAKeyInfo.Exponent);
-            var modulus = Convert.ToBase64String(RSAKeyInfo.Modulus);
+                var RSAKeyInfo = Org.BouncyCastle.Security.DotNetUtilities.ToRSAParameters(KeyParams);
+                var exponent = ByteArrayToUInt(RSAKeyInfo.Exponent);
+                var modulus = Convert.ToBase64String(RSAKeyInfo.Modulus);
+                storedPublicKey = new PublicKey(modulus, exponent);
+            }
 
-            return new PublicKey(modulus, exponent);
+            return storedPublicKey;
         }
         
         public byte[] Decrypt(byte[] encryptedData)
         {
-            var encryptEngine = new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine(), new Org.BouncyCastle.Crypto.Digests.Sha256Digest());
+            if(encryptEngine == null)
+            {
+              var encryptEngineTemp = new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine(), new Org.BouncyCastle.Crypto.Digests.Sha256Digest());
 
-            Org.BouncyCastle.OpenSsl.PemReader pr =
-                new Org.BouncyCastle.OpenSsl.PemReader(
-                        new System.IO.StringReader(mPrivateKey));
-            Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair KeyParamsprivate
-                = (Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair)pr.ReadObject();
+              Org.BouncyCastle.OpenSsl.PemReader pr =
+                  new Org.BouncyCastle.OpenSsl.PemReader(
+                          new System.IO.StringReader(privateKey));
+              Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair KeyParamsprivate
+                  = (Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair)pr.ReadObject();
 
-            encryptEngine.Init(false, KeyParamsprivate.Private);
+              encryptEngineTemp.Init(false, KeyParamsprivate.Private);
+              encryptEngine = encryptEngineTemp;
+            }
 
             return encryptEngine.ProcessBlock(encryptedData, 0, encryptedData.Length);
         }

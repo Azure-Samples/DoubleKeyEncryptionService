@@ -33,11 +33,11 @@ namespace customerkeystore
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.MinimumSameSitePolicy = SameSiteMode.Strict;
             });
 
 
-            services.AddSingleton<ippw.KeyStore, ippw.TestKeyStore>();
+            services.AddSingleton<ippw.IKeyStore, ippw.TestKeyStore>();
             services.AddTransient<ippw.KeyManager, ippw.KeyManager>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

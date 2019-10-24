@@ -2,7 +2,7 @@ using System;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
-    public interface Key
+    public interface IKey
     {
         PublicKey GetPublicKey();
         byte[] Decrypt(byte[] encryptedData);
