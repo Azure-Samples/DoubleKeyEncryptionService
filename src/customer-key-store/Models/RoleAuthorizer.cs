@@ -7,8 +7,8 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     public class RoleAuthorizer : IAuthorizer
     {
-        const string sidClaim = "onprem_sid";
-        const string roleProperty = "memberof";
+        const string SidClaim = "onprem_sid";
+        const string RoleProperty = "memberof";
 
         private string ldapPath;
         private HashSet<string> roles = new HashSet<string>();
@@ -29,7 +29,7 @@ namespace Microsoft.InformationProtection.Web.Models
             var splitStrings = memberOf.Split(",");
 
             //This function obtains the first string in a comma separated string of strings
-            //A comma can be delimited by a \ and in that case it should continue searching
+            //A comma can be escaped by a \ and in that case it should continue searching
 
             for(int index = 0; index < splitStrings.Length; index++)
             {
@@ -58,7 +58,7 @@ namespace Microsoft.InformationProtection.Web.Models
 
             foreach(var claim in user.Claims)
             {
-                if(claim.Type == sidClaim)
+                if(claim.Type == SidClaim)
                 {
                     claimFound = true;
                     Dsearch.Filter = "(objectSid=" + claim.Value + ")";
@@ -68,7 +68,7 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(!claimFound)
             {
-                throw new System.ArgumentException(sidClaim + " claim not found");
+                throw new System.ArgumentException(SidClaim + " claim not found");
             }            
 
             var result = Dsearch.FindOne();
@@ -78,7 +78,7 @@ namespace Microsoft.InformationProtection.Web.Models
                 throw new System.ArgumentException("User not found");
             }
 
-            var memberof = result.Properties[roleProperty];
+            var memberof = result.Properties[RoleProperty];
             foreach(var member in memberof)
             {
                 //Split out the first part of the role to the comma

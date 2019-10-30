@@ -11,8 +11,8 @@ namespace Microsoft.InformationProtection.Web.Models
         private Dictionary<string, Dictionary<string, KeyStoreData>> keys = new Dictionary<string, Dictionary<string, KeyStoreData>>();
         private Dictionary<string, string> activeKeys = new Dictionary<string, string>();
 
-        private const string keyType = "RSA";
-        private const string algorithm = "RS256";
+        private const string KeyType = "RSA";
+        private const string Algorithm = "RS256";
 
         private void CreateTestKey(
             string keyName, 
@@ -123,8 +123,8 @@ namespace Microsoft.InformationProtection.Web.Models
                     id, 
                     publicPem, 
                     privatePem, 
-                    keyType, 
-                    algorithm, 
+                    KeyType, 
+                    Algorithm, 
                     keyAuth,
                     expirationTimeInDays);
             }

@@ -4,12 +4,12 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     public class TestKey : IKey
     {
-        private static readonly string publicKeyFormatter =
+        private static readonly string PublicKeyFormatter =
 @"-----BEGIN PUBLIC KEY-----
 {0}
 -----END PUBLIC KEY-----";
 
-        private static readonly string privateKeyFormatter = 
+        private static readonly string PrivateKeyFormatter = 
 @"-----BEGIN RSA PRIVATE KEY-----
 {0}
 -----END RSA PRIVATE KEY-----";
@@ -21,8 +21,8 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public TestKey(string publicKey, string privateKey)
         {
-            this.publicKey = string.Format(publicKeyFormatter, publicKey);
-            this.privateKey = string.Format(privateKeyFormatter, privateKey);
+            this.publicKey = string.Format(PublicKeyFormatter, publicKey);
+            this.privateKey = string.Format(PrivateKeyFormatter, privateKey);
         }
         
         public PublicKey GetPublicKey()
@@ -68,19 +68,22 @@ namespace Microsoft.InformationProtection.Web.Models
         {
             uint retVal = 0;
 
-            if (BitConverter.IsLittleEndian)
+            checked
             {
-                for (int index = array.Length - 1; index >= 0; index--)
-                {
-                    retVal = (retVal << 8) + array[index];
-                }
-            }
-            else
-            {
-                for (int index = 0; index < array.Length; index++)
-                {
-                    retVal = (retVal << 8) + array[index];
-                }
+              if (BitConverter.IsLittleEndian)
+              {
+                  for (int index = array.Length - 1; index >= 0; index--)
+                  {
+                      retVal = (retVal << 8) + array[index];
+                  }
+              }
+              else
+              {
+                  for (int index = 0; index < array.Length; index++)
+                  {
+                      retVal = (retVal << 8) + array[index];
+                  }
+              }
             }
 
             return retVal;

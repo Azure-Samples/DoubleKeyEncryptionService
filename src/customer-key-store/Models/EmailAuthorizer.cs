@@ -6,8 +6,8 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     public class EmailAuthorizer : IAuthorizer
     {
-        const string emailClaim = ClaimTypes.Email;
-        const string upnClaim = ClaimTypes.Upn;
+        const string EmailClaim = ClaimTypes.Email;
+        const string UpnClaim = ClaimTypes.Upn;
         private HashSet<string> validEmails = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
         public void AddEmail(string email)
@@ -21,12 +21,12 @@ namespace Microsoft.InformationProtection.Web.Models
 
             foreach(var claim in user.Claims)
             {
-                if(claim.Type == emailClaim)
+                if(claim.Type == EmailClaim)
                 {
                     email = claim.Value;
                     break;
                 }
-                else if(claim.Type == upnClaim)
+                else if(claim.Type == UpnClaim)
                 {
                     email = claim.Value;
                     break;

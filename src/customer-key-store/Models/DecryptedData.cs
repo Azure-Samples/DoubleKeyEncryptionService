@@ -9,9 +9,9 @@ namespace Microsoft.InformationProtection.Web.Models
     //Changes in the returned format will break consuming clients
     public class DecryptedData
     {
-        public DecryptedData(string Value)
+        public DecryptedData(string value)
         {
-            this.Value = Value;
+            this.Value = value;
         }
 
         [Newtonsoft.Json.JsonProperty("value")]
