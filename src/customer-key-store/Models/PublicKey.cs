@@ -5,52 +5,54 @@ using System.Web;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
+    //The classes in this file implement the format of public key data returned for a key
+    //Changing the returned data can break consuming clients
     public class KeyData
     {
         public KeyData(PublicKey key, Cache cache)
         {
-            this.key = key;
-            this.cache = cache;
+            this.Key = key;
+            this.Cache = cache;
         }
 
-        public PublicKey key { get; set; }
+        [Newtonsoft.Json.JsonProperty("key")]
+        public PublicKey Key { get; private set; }
 
-        public Cache cache { get; set; }
+        [Newtonsoft.Json.JsonProperty("cache", NullValueHandling=Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Cache Cache { get; private set; }
     }
 
     public class PublicKey
     {
-        public PublicKey(string kty, string n, uint e, string alg, string kid)
+        public PublicKey(string Modulus, uint Exponent)
         {
-            this.kty = kty;
-            this.n = n;
-            this.e = e;
-            this.alg = alg;
-            this.kid = kid;
+            this.KeyType = String.Empty;
+            this.Modulus = Modulus;
+            this.Exponent = Exponent;
+            this.Algorithm = String.Empty;
+            this.KeyId = String.Empty;
         }
 
-        public PublicKey(string n, uint e)
-        {
-            this.kty = String.Empty;
-            this.n = n;
-            this.e = e;
-            this.alg = String.Empty;
-            this.kid = String.Empty;
-        }        
-
-        public string kty { get; set; }
-        public string n { get; set; }
-        public uint e { get; set; }
-        public string alg { get; set; }
-        public string kid { get; set; }
+        [Newtonsoft.Json.JsonProperty("kty")]
+        public string KeyType { get; set; }
+        [Newtonsoft.Json.JsonProperty("n")]
+        public string Modulus { get; private set; }
+        [Newtonsoft.Json.JsonProperty("e")]
+        public uint Exponent { get; private set; }
+        [Newtonsoft.Json.JsonProperty("alg")]
+        public string Algorithm { get; set; }
+        [Newtonsoft.Json.JsonProperty("kid")]
+        public string KeyId { get; set; }
     }
 
     public class Cache
     {
-        public Cache(string exp)
+        public Cache(string Expiration)
         {
-            this.exp = exp;
+            this.Expiration = Expiration;
         }
-        public string exp { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("exp")]
+        public string Expiration { get; private set; }
     }
 }

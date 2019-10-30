@@ -5,39 +5,43 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     public class KeyManager
     {
-        private readonly KeyStore mKeyStore;
+        private readonly IKeyStore keyStore;
 
-        public KeyManager(KeyStore keyStore)
+        public KeyManager(IKeyStore keyStore)
         {
-            mKeyStore = keyStore;
+            this.keyStore = keyStore;
         }
 
         public KeyData GetPublicKey(Uri requestUri, string keyName)
         {
-            var key = mKeyStore.GetActiveKey(keyName);
-            var publicKey = key.GetKey().GetPublicKey();
+            var key = keyStore.GetActiveKey(keyName);
+            var publicKey = key.Key.GetPublicKey();
 
-            publicKey.kid = requestUri.GetLeftPart(UriPartial.Path) + "/" + key.GetKeyId();
-            publicKey.kty = key.GetKeyType();
-            publicKey.alg = key.GetSupportedAlgorithm();
+            publicKey.KeyId = requestUri.GetLeftPart(UriPartial.Path) + "/" + key.KeyId;
+            publicKey.KeyType = key.KeyType;
+            publicKey.Algorithm = key.SupportedAlgorithm;
+            Cache cache = null;
 
-            var exp = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss");
+            if(key.ExpirationTimeInDays.HasValue)
+            {
+                cache = new Cache(DateTime.UtcNow.AddDays(key.ExpirationTimeInDays.Value).ToString("yyyy-MM-ddTHH:mm:ss"));
+            }
 
-            return new KeyData(publicKey, new Cache(exp));
+            return new KeyData(publicKey, cache);
         }
 
         public DecryptedData Decrypt(ClaimsPrincipal user, string keyName, string keyId, EncryptedData encryptedData)
         {
-            var keyData = mKeyStore.GetKey(keyName, keyId);
+            var keyData = keyStore.GetKey(keyName, keyId);
 
-            keyData.GetKeyAuth().CanUserAccessKey(user, keyData);
+            keyData.KeyAuth.CanUserAccessKey(user, keyData);
 
-            if (encryptedData.alg != "RSA-OAEP-256")
+            if (encryptedData.Algorithm != "RSA-OAEP-256")
             {
-                throw new Exception(encryptedData.alg + " is not supported");
+                throw new ArgumentException(encryptedData.Algorithm + " is not supported");
             }
             
-            var decryptedData = keyData.GetKey().Decrypt(Convert.FromBase64String(encryptedData.value));
+            var decryptedData = keyData.Key.Decrypt(Convert.FromBase64String(encryptedData.Value));
 
             return new DecryptedData(Convert.ToBase64String(decryptedData));
         } 

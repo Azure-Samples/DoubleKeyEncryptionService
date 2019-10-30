@@ -15,7 +15,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
     using ippw = Microsoft.InformationProtection.Web.Models;
     public class KeysController : Controller
     {
-        private readonly ippw.KeyManager mKeyManager;
+        private readonly ippw.KeyManager keyManager;
 
         private Uri GetRequestUri(AspNetCore.Http.HttpRequest request)
         {
@@ -24,17 +24,17 @@ namespace Microsoft.InformationProtection.Web.Controllers
 
         public KeysController(ippw.KeyManager keyManager)
         {
-            mKeyManager = keyManager;
+            this.keyManager = keyManager;
         }
         
         [HttpGet]
-        public IActionResult Key(string keyName)
+        public IActionResult GetKey(string keyName)
         {
             try
             {                
-                var publicKey = mKeyManager.GetPublicKey(GetRequestUri(Request), keyName);
+                var publicKey = keyManager.GetPublicKey(GetRequestUri(Request), keyName);
 
-                return Json(publicKey);
+                return Ok(publicKey);
             }
             catch(Exception e)
             {
@@ -48,9 +48,9 @@ namespace Microsoft.InformationProtection.Web.Controllers
         {
             try
             {
-                var decryptedData = mKeyManager.Decrypt(HttpContext.User, keyName, keyId, encryptedData);
+                var decryptedData = keyManager.Decrypt(HttpContext.User, keyName, keyId, encryptedData);
 
-                return Json(decryptedData);
+                return Ok(decryptedData);
             }
             catch(Exception e)
             {

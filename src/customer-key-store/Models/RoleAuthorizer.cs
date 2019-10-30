@@ -5,52 +5,45 @@ using System.Collections.Generic;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
-    public class RoleAuthorizer : Authorizer
+    public class RoleAuthorizer : IAuthorizer
     {
-        const string kSIDClaim = "onprem_sid";
-        const string kRoleProperty = "memberof";
+        const string SidClaim = "onprem_sid";
+        const string RoleProperty = "memberof";
 
-        private IConfiguration mConfiguration;
-        private HashSet<string> mRoles = new HashSet<string>();
+        private string ldapPath;
+        private HashSet<string> roles = new HashSet<string>();
 
         public RoleAuthorizer(IConfiguration configuration)
         {
-            mConfiguration = configuration;
+            ldapPath = configuration["RoleAuthorizer:LDAPPath"];
         }
 
         public void AddRole(string role)
         {
-            mRoles.Add(role);
+            roles.Add(role);
         }
 
         private string GetRole(string memberOf)
         {
-            int commaIndex = 0;
             string role = string.Empty;
-            bool roleFound = false;
-            var memberOfLength = memberOf.Length;
-            do
+            var splitStrings = memberOf.Split(",");
+
+            //This function obtains the first string in a comma separated string of strings
+            //A comma can be escaped by a \ and in that case it should continue searching
+
+            for(int index = 0; index < splitStrings.Length; index++)
             {
-                var newCommaIndex = memberOf.IndexOf(",", commaIndex);
-
-                if(newCommaIndex != -1)
+                role += splitStrings[index];
+                if(role.Length == 0 || role[role.Length - 1] != '\\')
                 {
-                    if(newCommaIndex == 0 || memberOf[newCommaIndex - 1] != '\\')
-                    {
-                        role += memberOf.Substring(commaIndex, newCommaIndex - commaIndex);
-                        roleFound = true;
-                    }
-                    else
-                    {
-                        //Found a delimited comma, skip over and continue searching
-                        role += memberOf.Substring(commaIndex, newCommaIndex - commaIndex - 1) + ",";
-                        newCommaIndex++;
-                    }
+                    break;
                 }
-
-                commaIndex = newCommaIndex;
+                else
+                {
+                    //Delimited comma is present, remove the delimiter (\) and add the comma back. Continue searching
+                    role = role.Substring(0, role.Length - 1) + ",";
+                }
             }
-            while(commaIndex > 0 && commaIndex < memberOfLength && !roleFound);
 
             return role;
         }
@@ -60,12 +53,12 @@ namespace Microsoft.InformationProtection.Web.Models
             bool success = false;
             bool claimFound = false;
             
-            DirectoryEntry entry = new DirectoryEntry("LDAP://" + mConfiguration["RoleAuthorizer:LDAPPath"]);
+            DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath);
             DirectorySearcher Dsearch = new DirectorySearcher(entry);
 
             foreach(var claim in user.Claims)
             {
-                if(claim.Type == kSIDClaim)
+                if(claim.Type == SidClaim)
                 {
                     claimFound = true;
                     Dsearch.Filter = "(objectSid=" + claim.Value + ")";
@@ -75,22 +68,22 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(!claimFound)
             {
-                throw new System.Exception(kSIDClaim + " claim not found");
+                throw new System.ArgumentException(SidClaim + " claim not found");
             }            
 
             var result = Dsearch.FindOne();
 
             if(result == null)
             {
-                throw new System.Exception("User not found");
+                throw new System.ArgumentException("User not found");
             }
 
-            var memberof = result.Properties[kRoleProperty];
+            var memberof = result.Properties[RoleProperty];
             foreach(var member in memberof)
             {
                 //Split out the first part of the role to the comma
                 var role = GetRole(member.ToString());
-                if(mRoles.Contains(role))
+                if(roles.Contains(role))
                 {
                     success = true;
                     break;
@@ -99,7 +92,7 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(!success)
             {
-                throw new System.Exception("User does not have access to the key");
+                throw new System.ArgumentException("User does not have access to the key");
             }
         }
     }

@@ -4,26 +4,29 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     public class KeyStoreData
     {
-        private Key mKey;
-        private string mKeyId;
-        private string mKeyType;
-        private string mSupportedAlgorithm;
-        private Authorizer mKeyAuth;
+        private IKey key;
+        private string keyId;
+        private string keyType;
+        private string supportedAlgorithm;
+        private IAuthorizer keyAuth;
+        private int? expirationTimeInDays;
 
-        public KeyStoreData(Key key, string keyId, string keyType, string supportedAlgorithm, Authorizer keyAuth)
+        public KeyStoreData(IKey key, string keyId, string keyType, string supportedAlgorithm, IAuthorizer keyAuth, int? expirationTimeInDays)
         {
-            mKey = key;
-            mKeyId = keyId;
-            mKeyType = keyType;
-            mSupportedAlgorithm = supportedAlgorithm;
-            mKeyAuth = keyAuth;
+            this.key = key;
+            this.keyId = keyId;
+            this.keyType = keyType;
+            this.supportedAlgorithm = supportedAlgorithm;
+            this.keyAuth = keyAuth;
+            this.expirationTimeInDays = expirationTimeInDays;
         }
 
-        public Key GetKey() { return mKey; }
-        public string GetKeyId() { return mKeyId; }
-        public string GetKeyType() { return mKeyType; }
-        public string GetSupportedAlgorithm() { return mSupportedAlgorithm; }
-        public Authorizer GetKeyAuth() { return mKeyAuth; }
+        public IKey Key { get { return key; } }
+        public string KeyId { get { return keyId; } }
+        public string KeyType { get { return keyType; } }
+        public string SupportedAlgorithm { get { return supportedAlgorithm; } }
+        public IAuthorizer KeyAuth { get { return keyAuth; } }
+        public int? ExpirationTimeInDays { get { return expirationTimeInDays; } }
 
     }
 }
