@@ -36,6 +36,10 @@ namespace Microsoft.InformationProtection.Web.Controllers
 
                 return Ok(publicKey);
             }
+            catch(CustomerKeyStore.Models.KeyAccessException)
+            {
+                return StatusCode(403);
+            }            
             catch(Exception e)
             {
                 return BadRequest(e);
@@ -52,6 +56,10 @@ namespace Microsoft.InformationProtection.Web.Controllers
 
                 return Ok(decryptedData);
             }
+            catch(CustomerKeyStore.Models.KeyAccessException)
+            {
+                return StatusCode(403);
+            }            
             catch(Exception e)
             {
                 return BadRequest(e);

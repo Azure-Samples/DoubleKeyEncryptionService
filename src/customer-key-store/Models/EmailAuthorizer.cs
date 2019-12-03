@@ -40,7 +40,7 @@ namespace Microsoft.InformationProtection.Web.Models
 
             if(!validEmails.Contains(email.Trim()))
             {
-                throw new System.ArgumentException("User does not have access to the key");
+                throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
             }
         }
     }
