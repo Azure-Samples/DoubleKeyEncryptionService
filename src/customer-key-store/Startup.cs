@@ -42,15 +42,16 @@ namespace customerkeystore
             services.AddSingleton<ippw.IKeyStore, ippw.TestKeyStore>();
             #endif
             services.AddTransient<ippw.KeyManager, ippw.KeyManager>();
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddAuthentication(sharedOptions =>
             {
                 sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options => 
+           .AddJwtBearer(options => 
             { 
                 Configuration.Bind("AzureAd", options);
                 options.Audience = Configuration["JwtAudience"];

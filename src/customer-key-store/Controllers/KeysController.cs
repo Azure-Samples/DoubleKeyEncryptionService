@@ -25,7 +25,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
         public KeysController(ippw.KeyManager keyManager)
         {
             this.keyManager = keyManager;
-        }
+        }       
         
         [HttpGet]
         public IActionResult GetKey(string keyName)
