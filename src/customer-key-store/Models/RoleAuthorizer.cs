@@ -23,53 +23,53 @@ namespace Microsoft.InformationProtection.Web.Models
             roles.Add(role);
         }
 
-        private string GetRole(string memberOf)
+        private string ParseCN(string cn)
         {
+            //The CN is terminated by a comma
+            //A comma can be part of the CN if it is escaped by \ in which case continue searching, adding the comma without the \
+            int commaIndex = 3; //Skip over CN=
             string role = string.Empty;
-            var splitStrings = memberOf.Split(",");
 
-            //This function obtains the first string in a comma separated string of strings
-            //A comma can be escaped by a \ and in that case it should continue searching
-
-            for(int index = 0; index < splitStrings.Length; index++)
+            do
             {
-                role += splitStrings[index];
-                if(role.Length == 0 || role[role.Length - 1] != '\\')
+                var newCommaIndex = cn.IndexOf(",", commaIndex);
+
+                if(newCommaIndex != -1)
                 {
-                    break;
+                    if(cn[newCommaIndex - 1] == '\\')
+                    {
+                        //Found a delimited comma, skip over, add it to the resulting string, and continue searching
+                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex - 1) + ",";
+                        newCommaIndex++;
+                    }
+                    else
+                    {
+                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex);
+                        break;
+                    }
                 }
-                else
-                {
-                    //Delimited comma is present, remove the delimiter (\) and add the comma back. Continue searching
-                    role = role.Substring(0, role.Length - 1) + ",";
-                }
+                commaIndex = newCommaIndex;
             }
+            while(commaIndex > 0 && commaIndex < cn.Length);
 
             return role;
         }
 
-        public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
+        private string GetRole(string memberOf)
+        {
+            //Locate CN=<role>,
+            int commaIndex = memberOf.IndexOf("CN=");
+            return commaIndex == -1 ? string.Empty : ParseCN(memberOf.Substring(commaIndex));
+        }
+
+        public void CanUserAccessKey(string sid, KeyStoreData key)
         {
             bool success = false;
-            bool claimFound = false;
             
             DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath);
             DirectorySearcher Dsearch = new DirectorySearcher(entry);
 
-            foreach(var claim in user.Claims)
-            {
-                if(claim.Type == SidClaim)
-                {
-                    claimFound = true;
-                    Dsearch.Filter = "(objectSid=" + claim.Value + ")";
-                    break;
-                }
-            }
-
-            if(!claimFound)
-            {
-                throw new System.ArgumentException(SidClaim + " claim not found");
-            }            
+            Dsearch.Filter = "(objectSid=" + sid + ")";
 
             var result = Dsearch.FindOne();
 
@@ -83,7 +83,7 @@ namespace Microsoft.InformationProtection.Web.Models
             {
                 //Split out the first part of the role to the comma
                 var role = GetRole(member.ToString());
-                if(roles.Contains(role))
+                if(!string.IsNullOrEmpty(role) && roles.Contains(role))
                 {
                     success = true;
                     break;
@@ -94,6 +94,26 @@ namespace Microsoft.InformationProtection.Web.Models
             {
                 throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
             }
+        }
+        public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
+        {
+            string sid = null;
+
+            foreach(var claim in user.Claims)
+            {
+                if(claim.Type == SidClaim)
+                {
+                    sid = claim.Value;
+                    break;
+                }
+            }
+
+            if(sid == null)
+            {
+                throw new System.ArgumentException(SidClaim + " claim not found");
+            }
+
+            CanUserAccessKey(sid, key);
         }
     }
 }
