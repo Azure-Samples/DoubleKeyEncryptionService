@@ -1,15 +1,17 @@
 using System;
+using sg = System.Globalization;
+using Microsoft.InformationProtection.Web.Models.Extensions;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
     public class TestKey : IKey
     {
-        private static readonly string PublicKeyFormatter =
+        private const string PublicKeyFormatter =
 @"-----BEGIN PUBLIC KEY-----
 {0}
 -----END PUBLIC KEY-----";
 
-        private static readonly string PrivateKeyFormatter = 
+        private const string PrivateKeyFormatter = 
 @"-----BEGIN RSA PRIVATE KEY-----
 {0}
 -----END RSA PRIVATE KEY-----";
@@ -21,8 +23,8 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public TestKey(string publicKey, string privateKey)
         {
-            this.publicKey = string.Format(PublicKeyFormatter, publicKey);
-            this.privateKey = string.Format(PrivateKeyFormatter, privateKey);
+            this.publicKey = string.Format(sg.CultureInfo.InvariantCulture, PublicKeyFormatter, publicKey);
+            this.privateKey = string.Format(sg.CultureInfo.InvariantCulture, PrivateKeyFormatter, privateKey);
         }
         
         public PublicKey GetPublicKey()
@@ -47,6 +49,8 @@ namespace Microsoft.InformationProtection.Web.Models
         
         public byte[] Decrypt(byte[] encryptedData)
         {
+            encryptedData.ThrowIfNull(nameof(encryptedData));
+
             if(encryptEngine == null)
             {
               var encryptEngineTemp = new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine(), new Org.BouncyCastle.Crypto.Digests.Sha256Digest());

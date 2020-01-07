@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Extensions;
-
 //https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-protected-web-api-app-configuration
 
 namespace Microsoft.InformationProtection.Web.Controllers
@@ -17,7 +16,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
     {
         private readonly ippw.KeyManager keyManager;
 
-        private Uri GetRequestUri(AspNetCore.Http.HttpRequest request)
+        private static Uri GetRequestUri(AspNetCore.Http.HttpRequest request)
         {
             return new Uri(request.GetDisplayUrl());
         }
@@ -31,7 +30,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
         public IActionResult GetKey(string keyName)
         {
             try
-            {                
+            {
                 var publicKey = keyManager.GetPublicKey(GetRequestUri(Request), keyName);
 
                 return Ok(publicKey);
@@ -39,8 +38,8 @@ namespace Microsoft.InformationProtection.Web.Controllers
             catch(CustomerKeyStore.Models.KeyAccessException)
             {
                 return StatusCode(403);
-            }            
-            catch(Exception e)
+            }
+            catch(ArgumentException e)
             {
                 return BadRequest(e);
             }
@@ -59,8 +58,8 @@ namespace Microsoft.InformationProtection.Web.Controllers
             catch(CustomerKeyStore.Models.KeyAccessException)
             {
                 return StatusCode(403);
-            }            
-            catch(Exception e)
+            }
+            catch(ArgumentException e)
             {
                 return BadRequest(e);
             }

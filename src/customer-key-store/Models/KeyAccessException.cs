@@ -4,6 +4,11 @@ namespace CustomerKeyStore.Models
 {
     public class KeyAccessException : Exception
     {
+        private KeyAccessException()
+        {
+
+        }
+        
         public KeyAccessException(string message)
             : base(message)
         {

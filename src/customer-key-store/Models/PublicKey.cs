@@ -9,7 +9,7 @@ namespace Microsoft.InformationProtection.Web.Models
     //Changing the returned data can break consuming clients
     public class KeyData
     {
-        public KeyData(PublicKey key, Cache cache)
+        public KeyData(PublicKey key, PublicKeyCache cache)
         {
             this.Key = key;
             this.Cache = cache;
@@ -19,7 +19,7 @@ namespace Microsoft.InformationProtection.Web.Models
         public PublicKey Key { get; private set; }
 
         [Newtonsoft.Json.JsonProperty("cache", NullValueHandling=Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Cache Cache { get; private set; }
+        public PublicKeyCache Cache { get; private set; }
     }
 
     public class PublicKey
@@ -45,9 +45,9 @@ namespace Microsoft.InformationProtection.Web.Models
         public string KeyId { get; set; }
     }
 
-    public class Cache
+    public class PublicKeyCache
     {
-        public Cache(string Expiration)
+        public PublicKeyCache(string Expiration)
         {
             this.Expiration = Expiration;
         }

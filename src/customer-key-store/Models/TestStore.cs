@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Binder;
+using sg = System.Globalization;
+using Microsoft.InformationProtection.Web.Models.Extensions;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
@@ -15,8 +17,8 @@ namespace Microsoft.InformationProtection.Web.Models
         private const string Algorithm = "RS256";
 
         private void CreateTestKey(
-            string keyName, 
-            string keyId, 
+            string keyName,
+            string keyId,
             string publicKey,
             string privateKey,
             string keyType,
@@ -24,10 +26,7 @@ namespace Microsoft.InformationProtection.Web.Models
             IAuthorizer keyAuth,
             int? expirationTimeInDays)
         {
-            if(keyAuth == null)
-            {
-                throw new ArgumentException("An authorizer must be specified for a key");
-            }
+            keyAuth.ThrowIfNull(nameof(keyAuth));
 
             keys.Add(keyName, new Dictionary<string, KeyStoreData>());
 
@@ -47,12 +46,14 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public TestKeyStore(IConfiguration configuration)
         {
+            configuration.ThrowIfNull(nameof(configuration));
+
             var testKeysSection = configuration.GetSection("TestKeys");
             IAuthorizer keyAuth = null;
 
             if(!testKeysSection.Exists())
             {
-              throw new System.ArgumentException("TestKeys section does not exist");
+                throw new System.ArgumentException("TestKeys section does not exist");
             }
             
             foreach(var testKey in testKeysSection.GetChildren())
@@ -90,7 +91,7 @@ namespace Microsoft.InformationProtection.Web.Models
                 var cacheTime = testKey["CacheExpirationInDays"];
                 if(cacheTime != null)
                 {
-                    expirationTimeInDays = Convert.ToInt32(cacheTime);
+                    expirationTimeInDays = Convert.ToInt32(cacheTime, sg.CultureInfo.InvariantCulture);
                 }
                 
                 var name = testKey["Name"];

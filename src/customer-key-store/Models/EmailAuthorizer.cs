@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using Microsoft.InformationProtection.Web.Models.Extensions;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
@@ -12,12 +13,16 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public void AddEmail(string email)
         {
+            email.ThrowIfNull(nameof(email));
+
             validEmails.Add(email.Trim());
         }
 
         public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
         {
             string email = null;
+
+            user.ThrowIfNull(nameof(user));
 
             foreach(var claim in user.Claims)
             {
@@ -30,7 +35,7 @@ namespace Microsoft.InformationProtection.Web.Models
                 {
                     email = claim.Value;
                     break;
-                }                
+                }
             }
 
             if(email == null)

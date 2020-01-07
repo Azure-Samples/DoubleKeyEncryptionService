@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.DirectoryServices;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using Microsoft.InformationProtection.Web.Models.Extensions;
 
 namespace Microsoft.InformationProtection.Web.Models
 {
@@ -15,6 +16,8 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public RoleAuthorizer(IConfiguration configuration)
         {
+            configuration.ThrowIfNull(nameof(configuration));
+
             ldapPath = configuration["RoleAuthorizer:LDAPPath"];
         }
 
@@ -50,49 +53,54 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
         {
+            user.ThrowIfNull(nameof(user));
+
             bool success = false;
             bool claimFound = false;
             
-            DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath);
-            DirectorySearcher Dsearch = new DirectorySearcher(entry);
-
-            foreach(var claim in user.Claims)
+            using(DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath))
             {
-                if(claim.Type == SidClaim)
+                using(DirectorySearcher Dsearch = new DirectorySearcher(entry))
                 {
-                    claimFound = true;
-                    Dsearch.Filter = "(objectSid=" + claim.Value + ")";
-                    break;
+                    foreach(var claim in user.Claims)
+                    {
+                        if(claim.Type == SidClaim)
+                        {
+                            claimFound = true;
+                            Dsearch.Filter = "(objectSid=" + claim.Value + ")";
+                            break;
+                        }
+                    }
+
+                    if(!claimFound)
+                    {
+                        throw new System.ArgumentException(SidClaim + " claim not found");
+                    }
+
+                    var result = Dsearch.FindOne();
+
+                    if(result == null)
+                    {
+                        throw new System.ArgumentException("User not found");
+                    }
+
+                    var memberof = result.Properties[RoleProperty];
+                    foreach(var member in memberof)
+                    {
+                        //Split out the first part of the role to the comma
+                        var role = GetRole(member.ToString());
+                        if(roles.Contains(role))
+                        {
+                            success = true;
+                            break;
+                        }
+                    }
+
+                    if(!success)
+                    {
+                        throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
+                    }
                 }
-            }
-
-            if(!claimFound)
-            {
-                throw new System.ArgumentException(SidClaim + " claim not found");
-            }            
-
-            var result = Dsearch.FindOne();
-
-            if(result == null)
-            {
-                throw new System.ArgumentException("User not found");
-            }
-
-            var memberof = result.Properties[RoleProperty];
-            foreach(var member in memberof)
-            {
-                //Split out the first part of the role to the comma
-                var role = GetRole(member.ToString());
-                if(roles.Contains(role))
-                {
-                    success = true;
-                    break;
-                }
-            }
-
-            if(!success)
-            {
-                throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
             }
         }
     }
