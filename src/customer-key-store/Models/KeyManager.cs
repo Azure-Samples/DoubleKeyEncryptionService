@@ -1,10 +1,12 @@
-using System;
-using System.Security.Claims;
-using sg = System.Globalization;
-using Microsoft.InformationProtection.Web.Models.Extensions;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
+    using System;
+    using System.Security.Claims;
+    using Microsoft.InformationProtection.Web.Models.Extensions;
+    using sg = System.Globalization;
+
     public class KeyManager
     {
         private readonly IKeyStore keyStore;
@@ -52,11 +54,10 @@ namespace Microsoft.InformationProtection.Web.Models
             {
                 throw new ArgumentException(encryptedData.Algorithm + " is not supported");
             }
-            
+
             var decryptedData = keyData.Key.Decrypt(Convert.FromBase64String(encryptedData.Value));
 
             return new DecryptedData(Convert.ToBase64String(decryptedData));
-        } 
-
+        }
     }
 }

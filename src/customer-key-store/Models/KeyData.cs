@@ -1,5 +1,5 @@
-using System;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
     public class KeyStoreData
@@ -27,6 +27,5 @@ namespace Microsoft.InformationProtection.Web.Models
         public string SupportedAlgorithm { get { return supportedAlgorithm; } }
         public IAuthorizer KeyAuth { get { return keyAuth; } }
         public int? ExpirationTimeInDays { get { return expirationTimeInDays; } }
-
     }
 }

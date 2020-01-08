@@ -1,14 +1,15 @@
-using System.Security.Claims;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
-using Microsoft.InformationProtection.Web.Models.Extensions;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
+    using System.Collections.Generic;
+    using System.Security.Claims;
+
+    using Microsoft.InformationProtection.Web.Models.Extensions;
     public class EmailAuthorizer : IAuthorizer
     {
-        const string EmailClaim = ClaimTypes.Email;
-        const string UpnClaim = ClaimTypes.Upn;
+        private const string EmailClaim = ClaimTypes.Email;
+        private const string UpnClaim = ClaimTypes.Upn;
         private HashSet<string> validEmails = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
         public void AddEmail(string email)
