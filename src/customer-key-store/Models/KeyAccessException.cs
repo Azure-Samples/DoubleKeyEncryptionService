@@ -1,7 +1,8 @@
-using System;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace CustomerKeyStore.Models
 {
+    using System;
     public class KeyAccessException : Exception
     {
         public KeyAccessException(string message)
@@ -11,6 +12,10 @@ namespace CustomerKeyStore.Models
 
         public KeyAccessException(string message, Exception inner)
             : base(message, inner)
+        {
+        }
+
+        private KeyAccessException()
         {
         }
     }

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-
-namespace customerkeystore
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+namespace CustomerKeyStore
 {
-    public class Program
+    using Microsoft.AspNetCore;
+    using Microsoft.AspNetCore.Hosting;
+    public static class Program
     {
         public static void Main(string[] args)
         {

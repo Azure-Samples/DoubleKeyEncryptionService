@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="ruleset" ToolsVersion="16.0">
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="CA1303" Action="None" />  <!-- String literals should be in a resource file.  At this point there are no plans to localize this project-->
+  </Rules>
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA1649" Action="None" />  <!-- File name must match type name-->
+    <Rule Id="SA1101" Action="None" />  <!-- Member variables must be prefixed with this-->
+    <Rule Id="SA1005" Action="None" />  <!-- Comment must begin with a space-->
+    <Rule Id="SA1515" Action="None" />  <!-- Single-line comment should be preceded by blank line-->
+    <Rule Id="SA1000" Action="None" />  <!-- Space required after catch keyword-->
+    <Rule Id="SA1516" Action="None" />  <!-- Elements must be separated by blank line-->
+    <Rule Id="SA1502" Action="None" />  <!-- Element should not be on a single line-->
+    <Rule Id="SA1512" Action="None" />  <!-- Single-line comments should not be followed by blank line-->
+    <Rule Id="SA1402" Action="None" />  <!-- File may only contain a single type-->
+    <Rule Id="SA1633" Action="None" />  <!-- File header must be xml-->
+    <Rule Id="CS1573" Action="None" />  <!-- Missing xml documentation-->
+    <Rule Id="CS1591" Action="None" />  <!-- Missing xml documentation-->
+    <Rule Id="CS1712" Action="None" />  <!-- Missing xml documentation-->
+    <Rule Id="SA1600" Action="None" />  <!-- Missing xml documentation-->
+  </Rules>
+</RuleSet>
