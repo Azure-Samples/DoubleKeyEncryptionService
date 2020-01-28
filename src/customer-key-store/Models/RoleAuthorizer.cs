@@ -23,45 +23,6 @@ namespace Microsoft.InformationProtection.Web.Models
             roles.Add(role);
         }
 
-        private string ParseCN(string cn)
-        {
-            //The CN is terminated by a comma
-            //A comma can be part of the CN if it is escaped by \ in which case continue searching, adding the comma without the \
-            int commaIndex = 3; //Skip over CN=
-            string role = string.Empty;
-
-            do
-            {
-                var newCommaIndex = cn.IndexOf(",", commaIndex);
-
-                if(newCommaIndex != -1)
-                {
-                    if(cn[newCommaIndex - 1] == '\\')
-                    {
-                        //Found a delimited comma, skip over, add it to the resulting string, and continue searching
-                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex - 1) + ",";
-                        newCommaIndex++;
-                    }
-                    else
-                    {
-                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex);
-                        break;
-                    }
-                }
-                commaIndex = newCommaIndex;
-            }
-            while(commaIndex > 0 && commaIndex < cn.Length);
-
-            return role;
-        }
-
-        private string GetRole(string memberOf)
-        {
-            //Locate CN=<role>,
-            int commaIndex = memberOf.IndexOf("CN=");
-            return commaIndex == -1 ? string.Empty : ParseCN(memberOf.Substring(commaIndex));
-        }
-
         public void CanUserAccessKey(string sid, KeyStoreData key)
         {
             bool success = false;
@@ -115,5 +76,44 @@ namespace Microsoft.InformationProtection.Web.Models
 
             CanUserAccessKey(sid, key);
         }
+
+        private string ParseCN(string cn)
+        {
+            //The CN is terminated by a comma
+            //A comma can be part of the CN if it is escaped by \ in which case continue searching, adding the comma without the \
+            int commaIndex = 3; //Skip over CN=
+            string role = string.Empty;
+
+            do
+            {
+                var newCommaIndex = cn.IndexOf(",", commaIndex);
+
+                if(newCommaIndex != -1)
+                {
+                    if(cn[newCommaIndex - 1] == '\\')
+                    {
+                        //Found a delimited comma, skip over, add it to the resulting string, and continue searching
+                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex - 1) + ",";
+                        newCommaIndex++;
+                    }
+                    else
+                    {
+                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex);
+                        break;
+                    }
+                }
+                commaIndex = newCommaIndex;
+            }
+            while(commaIndex > 0 && commaIndex < cn.Length);
+
+            return role;
+        }
+        
+        private string GetRole(string memberOf)
+        {
+            //Locate CN=<role>,
+            int commaIndex = memberOf.IndexOf("CN=");
+            return commaIndex == -1 ? string.Empty : ParseCN(memberOf.Substring(commaIndex));
+        }        
     }
 }
