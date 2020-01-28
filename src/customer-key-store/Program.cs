@@ -1,4 +1,6 @@
-﻿namespace CustomerKeyStore
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+namespace CustomerKeyStore
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;

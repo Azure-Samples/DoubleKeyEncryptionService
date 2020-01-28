@@ -31,13 +31,11 @@ namespace Microsoft.InformationProtection.Web.Models
         {
             user.ThrowIfNull(nameof(user));
 
-            bool success = false;
-            bool claimFound = false;
-
             using(DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath))
             {
                 using(DirectorySearcher dSearch = new DirectorySearcher(entry))
                 {
+                    bool claimFound = false;
                     foreach(var claim in user.Claims)
                     {
                         if(claim.Type == SidClaim)
@@ -61,18 +59,19 @@ namespace Microsoft.InformationProtection.Web.Models
                     }
 
                     var memberof = result.Properties[RoleProperty];
+                    bool roleFound = false;
                     foreach(var member in memberof)
                     {
                         //Split out the first part of the role to the comma
                         var role = GetRole(member.ToString());
                         if(roles.Contains(role))
                         {
-                            success = true;
+                            roleFound = true;
                             break;
                         }
                     }
 
-                    if(!success)
+                    if(!roleFound)
                     {
                         throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
                     }

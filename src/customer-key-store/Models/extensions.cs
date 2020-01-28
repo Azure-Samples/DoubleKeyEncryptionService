@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models.Extensions
-{
-public static class ExceptionExtensions
-{
-    public static void ThrowIfNull<T>(this T argument, string name)
+  {
+    public static class ExceptionExtensions
     {
-        if(argument == null)
+        public static void ThrowIfNull<T>(this T argument, string name)
         {
-            throw new System.ArgumentNullException(name);
+            if(argument == null)
+            {
+                throw new System.ArgumentNullException(name);
+            }
         }
     }
-}
 }

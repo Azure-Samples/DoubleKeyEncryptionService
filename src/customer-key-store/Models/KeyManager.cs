@@ -56,7 +56,6 @@ namespace Microsoft.InformationProtection.Web.Models
             }
 
             var decryptedData = keyData.Key.Decrypt(Convert.FromBase64String(encryptedData.Value));
-
             return new DecryptedData(Convert.ToBase64String(decryptedData));
         }
     }

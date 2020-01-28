@@ -59,10 +59,10 @@ namespace Microsoft.InformationProtection.Web.Models
               Org.BouncyCastle.OpenSsl.PemReader pr =
                   new Org.BouncyCastle.OpenSsl.PemReader(
                           new System.IO.StringReader(privateKey));
-              Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair keyParamsprivate
+              Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair keyParametersPrivate
                   = (Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair)pr.ReadObject();
 
-              encryptEngineTemp.Init(false, keyParamsprivate.Private);
+              encryptEngineTemp.Init(false, keyParametersPrivate.Private);
               encryptEngine = encryptEngineTemp;
             }
 
