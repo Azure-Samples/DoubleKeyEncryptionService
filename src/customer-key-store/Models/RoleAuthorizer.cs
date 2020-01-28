@@ -1,20 +1,24 @@
-using System.Security.Claims;
-using System.DirectoryServices;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
+    using System.Collections.Generic;
+    using System.DirectoryServices;
+    using System.Security.Claims;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.InformationProtection.Web.Models.Extensions;
     public class RoleAuthorizer : IAuthorizer
     {
-        const string SidClaim = "onprem_sid";
-        const string RoleProperty = "memberof";
+        private const string SidClaim = "onprem_sid";
+        private const string RoleProperty = "memberof";
 
         private string ldapPath;
         private HashSet<string> roles = new HashSet<string>();
 
         public RoleAuthorizer(IConfiguration configuration)
         {
+            configuration.ThrowIfNull(nameof(configuration));
+
             ldapPath = configuration["RoleAuthorizer:LDAPPath"];
         }
 
@@ -25,8 +29,8 @@ namespace Microsoft.InformationProtection.Web.Models
 
         public void CanUserAccessKey(string sid, KeyStoreData key)
         {
-            bool success = false;
-            
+            sid.ThrowIfNull(nameof(sid));
+
             DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath);
             DirectorySearcher Dsearch = new DirectorySearcher(entry);
 
@@ -40,6 +44,7 @@ namespace Microsoft.InformationProtection.Web.Models
             }
 
             var memberof = result.Properties[RoleProperty];
+            bool success = false;
             foreach(var member in memberof)
             {
                 //Split out the first part of the role to the comma
@@ -58,6 +63,8 @@ namespace Microsoft.InformationProtection.Web.Models
         }
         public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
         {
+            user.ThrowIfNull(nameof(user));
+            
             string sid = null;
 
             foreach(var claim in user.Claims)

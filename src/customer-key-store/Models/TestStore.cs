@@ -1,60 +1,31 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Binder;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
+    using System;
+    using System.Collections.Generic;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.InformationProtection.Web.Models.Extensions;
+    using sg = System.Globalization;
     public class TestKeyStore : IKeyStore
     {
-
+        private const string KeyType = "RSA";
+        private const string Algorithm = "RS256";
         private Dictionary<string, Dictionary<string, KeyStoreData>> keys = new Dictionary<string, Dictionary<string, KeyStoreData>>();
         private Dictionary<string, string> activeKeys = new Dictionary<string, string>();
 
-        private const string KeyType = "RSA";
-        private const string Algorithm = "RS256";
-
-        private void CreateTestKey(
-            string keyName, 
-            string keyId, 
-            string publicKey,
-            string privateKey,
-            string keyType,
-            string algorithm,
-            IAuthorizer keyAuth,
-            int? expirationTimeInDays)
-        {
-            if(keyAuth == null)
-            {
-                throw new ArgumentException("An authorizer must be specified for a key");
-            }
-
-            keys.Add(keyName, new Dictionary<string, KeyStoreData>());
-
-            keys[keyName][keyId] = new KeyStoreData(
-                                                new TestKey(publicKey, privateKey),
-                                                keyId,
-                                                keyType,
-                                                algorithm,
-                                                keyAuth,
-                                                expirationTimeInDays);
-
-            if(!activeKeys.ContainsKey(keyName))   //Multiple keys with the same name can be in the app settings, the first one for the current name is active, the rest have been rolled
-            {
-                activeKeys[keyName] = keyId;
-            }
-        }
-
         public TestKeyStore(IConfiguration configuration)
         {
+            configuration.ThrowIfNull(nameof(configuration));
+
             var testKeysSection = configuration.GetSection("TestKeys");
             IAuthorizer keyAuth = null;
 
             if(!testKeysSection.Exists())
             {
-              throw new System.ArgumentException("TestKeys section does not exist");
+                throw new System.ArgumentException("TestKeys section does not exist");
             }
-            
+
             foreach(var testKey in testKeysSection.GetChildren())
             {
                 List<string> roles = new List<string>();
@@ -62,7 +33,7 @@ namespace Microsoft.InformationProtection.Web.Models
                 var validEmails = testKey.GetSection("AuthorizedEmailAddress");
 
                 if(validRoles != null && validRoles.Exists() &&
-                   validEmails != null && validEmails.Exists()) 
+                   validEmails != null && validEmails.Exists())
                 {
                     throw new System.ArgumentException("Both role and email authorizers cannot be used on the same test key");
                 }
@@ -83,16 +54,16 @@ namespace Microsoft.InformationProtection.Web.Models
                     foreach(var email in validEmails.GetChildren())
                     {
                         emailAuth.AddEmail(email.Value);
-                    }                    
+                    }
                 }
 
                 int? expirationTimeInDays = null;
                 var cacheTime = testKey["CacheExpirationInDays"];
                 if(cacheTime != null)
                 {
-                    expirationTimeInDays = Convert.ToInt32(cacheTime);
+                    expirationTimeInDays = Convert.ToInt32(cacheTime, sg.CultureInfo.InvariantCulture);
                 }
-                
+
                 var name = testKey["Name"];
                 var id = testKey["Id"];
                 var publicPem = testKey["PublicPem"];
@@ -116,15 +87,15 @@ namespace Microsoft.InformationProtection.Web.Models
                 if(privatePem == null)
                 {
                   throw new System.ArgumentException("The key must have a privatePem");
-                }                                                
+                }
 
                 CreateTestKey(
                     name,
-                    id, 
-                    publicPem, 
-                    privatePem, 
-                    KeyType, 
-                    Algorithm, 
+                    id,
+                    publicPem,
+                    privatePem,
+                    KeyType,
+                    Algorithm,
                     keyAuth,
                     expirationTimeInDays);
             }
@@ -155,6 +126,34 @@ namespace Microsoft.InformationProtection.Web.Models
             }
 
             return foundKey;
+        }
+
+        private void CreateTestKey(
+            string keyName,
+            string keyId,
+            string publicKey,
+            string privateKey,
+            string keyType,
+            string algorithm,
+            IAuthorizer keyAuth,
+            int? expirationTimeInDays)
+        {
+            keyAuth.ThrowIfNull(nameof(keyAuth));
+
+            keys.Add(keyName, new Dictionary<string, KeyStoreData>());
+
+            keys[keyName][keyId] = new KeyStoreData(
+                                                new TestKey(publicKey, privateKey),
+                                                keyId,
+                                                keyType,
+                                                algorithm,
+                                                keyAuth,
+                                                expirationTimeInDays);
+            //Multiple keys with the same name can be in the app settings, the first one for the current name is active, the rest have been rolled
+            if(!activeKeys.ContainsKey(keyName))
+            {
+                activeKeys[keyName] = keyId;
+            }
         }
     }
 }

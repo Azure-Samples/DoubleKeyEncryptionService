@@ -1,15 +1,18 @@
-using System;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
+    using System;
+    using Microsoft.InformationProtection.Web.Models.Extensions;
+    using sg = System.Globalization;
     public class TestKey : IKey
     {
-        private static readonly string PublicKeyFormatter =
+        private const string PublicKeyFormatter =
 @"-----BEGIN PUBLIC KEY-----
 {0}
 -----END PUBLIC KEY-----";
 
-        private static readonly string PrivateKeyFormatter = 
+        private const string PrivateKeyFormatter =
 @"-----BEGIN RSA PRIVATE KEY-----
 {0}
 -----END RSA PRIVATE KEY-----";
@@ -17,36 +20,38 @@ namespace Microsoft.InformationProtection.Web.Models
         private string publicKey;
         private string privateKey;
         private PublicKey storedPublicKey = null;
-        Org.BouncyCastle.Crypto.Encodings.OaepEncoding encryptEngine = null;
+        private Org.BouncyCastle.Crypto.Encodings.OaepEncoding encryptEngine = null;
 
         public TestKey(string publicKey, string privateKey)
         {
-            this.publicKey = string.Format(PublicKeyFormatter, publicKey);
-            this.privateKey = string.Format(PrivateKeyFormatter, privateKey);
+            this.publicKey = string.Format(sg.CultureInfo.InvariantCulture, PublicKeyFormatter, publicKey);
+            this.privateKey = string.Format(sg.CultureInfo.InvariantCulture, PrivateKeyFormatter, privateKey);
         }
-        
+
         public PublicKey GetPublicKey()
         {
-            if(storedPublicKey == null) 
+            if(storedPublicKey == null)
             {
-                Org.BouncyCastle.OpenSsl.PemReader pr = 
+                Org.BouncyCastle.OpenSsl.PemReader pr =
                     new Org.BouncyCastle.OpenSsl.PemReader(
                             new System.IO.StringReader(publicKey));
 
-                Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters KeyParams 
+                Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters keyParams
                     = (Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters)pr.ReadObject();
 
-                var RSAKeyInfo = Org.BouncyCastle.Security.DotNetUtilities.ToRSAParameters(KeyParams);
-                var exponent = ByteArrayToUInt(RSAKeyInfo.Exponent);
-                var modulus = Convert.ToBase64String(RSAKeyInfo.Modulus);
+                var rsaKeyInfo = Org.BouncyCastle.Security.DotNetUtilities.ToRSAParameters(keyParams);
+                var exponent = ByteArrayToUInt(rsaKeyInfo.Exponent);
+                var modulus = Convert.ToBase64String(rsaKeyInfo.Modulus);
                 storedPublicKey = new PublicKey(modulus, exponent);
             }
 
             return storedPublicKey;
         }
-        
+
         public byte[] Decrypt(byte[] encryptedData)
         {
+            encryptedData.ThrowIfNull(nameof(encryptedData));
+
             if(encryptEngine == null)
             {
               var encryptEngineTemp = new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine(), new Org.BouncyCastle.Crypto.Digests.Sha256Digest());
@@ -54,10 +59,10 @@ namespace Microsoft.InformationProtection.Web.Models
               Org.BouncyCastle.OpenSsl.PemReader pr =
                   new Org.BouncyCastle.OpenSsl.PemReader(
                           new System.IO.StringReader(privateKey));
-              Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair KeyParamsprivate
+              Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair keyParametersPrivate
                   = (Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair)pr.ReadObject();
 
-              encryptEngineTemp.Init(false, KeyParamsprivate.Private);
+              encryptEngineTemp.Init(false, keyParametersPrivate.Private);
               encryptEngine = encryptEngineTemp;
             }
 
@@ -87,6 +92,6 @@ namespace Microsoft.InformationProtection.Web.Models
             }
 
             return retVal;
-        }        
+        }
     }
 }
