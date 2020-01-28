@@ -27,44 +27,48 @@ namespace Microsoft.InformationProtection.Web.Models
             roles.Add(role);
         }
 
-        public void CanUserAccessKey(string sid, KeyStoreData key)
+        public void CanUserAccessKey(string sid)
         {
             sid.ThrowIfNull(nameof(sid));
 
-            DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath);
-            DirectorySearcher Dsearch = new DirectorySearcher(entry);
-
-            Dsearch.Filter = "(objectSid=" + sid + ")";
-
-            var result = Dsearch.FindOne();
-
-            if(result == null)
+            using(DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath))
             {
-                throw new System.ArgumentException("User not found");
-            }
-
-            var memberof = result.Properties[RoleProperty];
-            bool success = false;
-            foreach(var member in memberof)
-            {
-                //Split out the first part of the role to the comma
-                var role = GetRole(member.ToString());
-                if(!string.IsNullOrEmpty(role) && roles.Contains(role))
+                using(DirectorySearcher dSearch = new DirectorySearcher(entry))
                 {
-                    success = true;
-                    break;
+                    dSearch.Filter = "(objectSid=" + sid + ")";
+
+                    var result = dSearch.FindOne();
+
+                    if(result == null)
+                    {
+                        throw new System.ArgumentException("User not found");
+                    }
+
+                    var memberof = result.Properties[RoleProperty];
+                    bool success = false;
+                    foreach(var member in memberof)
+                    {
+                        //Split out the first part of the role to the comma
+                        var role = GetRole(member.ToString());
+                        if(!string.IsNullOrEmpty(role) && roles.Contains(role))
+                        {
+                            success = true;
+                            break;
+                        }
+                    }
+
+                    if(!success)
+                    {
+                        throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
+                    }
                 }
             }
-
-            if(!success)
-            {
-                throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
-            }
         }
+
         public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
         {
             user.ThrowIfNull(nameof(user));
-            
+
             string sid = null;
 
             foreach(var claim in user.Claims)
@@ -81,46 +85,59 @@ namespace Microsoft.InformationProtection.Web.Models
                 throw new System.ArgumentException(SidClaim + " claim not found");
             }
 
-            CanUserAccessKey(sid, key);
+            CanUserAccessKey(sid);
         }
 
-        private string ParseCN(string cn)
+        private static string ParseCN(string distinguishedName)
         {
+            distinguishedName.ThrowIfNull(nameof(distinguishedName));
+
             //The CN is terminated by a comma
             //A comma can be part of the CN if it is escaped by \ in which case continue searching, adding the comma without the \
-            int commaIndex = 3; //Skip over CN=
-            string role = string.Empty;
+            int commaIndex = distinguishedName.IndexOf("CN=", System.StringComparison.InvariantCulture);
 
+            if(commaIndex == -1)
+            {
+                return string.Empty;
+            }
+
+            System.Text.StringBuilder role = new System.Text.StringBuilder();
+            commaIndex += 3; //Skip over CN=
             do
             {
-                var newCommaIndex = cn.IndexOf(",", commaIndex);
+                var newCommaIndex = distinguishedName.IndexOf(",", commaIndex, System.StringComparison.InvariantCulture);
 
                 if(newCommaIndex != -1)
                 {
-                    if(cn[newCommaIndex - 1] == '\\')
+                    if(distinguishedName[newCommaIndex - 1] == '\\')
                     {
                         //Found a delimited comma, skip over, add it to the resulting string, and continue searching
-                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex - 1) + ",";
+                        role.Append(distinguishedName.Substring(commaIndex, newCommaIndex - commaIndex - 1)).Append(",");
                         newCommaIndex++;
                     }
                     else
                     {
-                        role += cn.Substring(commaIndex, newCommaIndex - commaIndex);
+                        role.Append(distinguishedName.Substring(commaIndex, newCommaIndex - commaIndex));
                         break;
                     }
                 }
+                else
+                {
+                    role.Append(distinguishedName.Substring(commaIndex));
+                    break;
+                }
+
                 commaIndex = newCommaIndex;
             }
-            while(commaIndex > 0 && commaIndex < cn.Length);
+            while(commaIndex > 0 && commaIndex < distinguishedName.Length);
 
-            return role;
+            return role.ToString();
         }
-        
-        private string GetRole(string memberOf)
+
+        public static string GetRole(string memberOf)
         {
-            //Locate CN=<role>,
-            int commaIndex = memberOf.IndexOf("CN=");
-            return commaIndex == -1 ? string.Empty : ParseCN(memberOf.Substring(commaIndex));
-        }        
+            memberOf.ThrowIfNull(nameof(memberOf));
+            return ParseCN(memberOf);
+        }
     }
 }
