@@ -35,7 +35,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Prerequisites
 
-- Install .NET Core by following the instructions at [dot.net/core](https://dot.net/core)
+- Install .NET Core 2.1 SDK by following the instructions at [dot.net/core](https://dotnet.microsoft.com/download/dotnet-core/2.1)
 - Install [Visual Studio Code](https://code.visualstudio.com/)
 
 ## Setup
@@ -50,10 +50,13 @@ Outline the file contents of the repository. It helps users navigate the codebas
 - Under 'TestKeys' section modify the following:
     - Change the 'Name' value
     - Change the 'Id' value to contain a GUID
-    - If running on prem then add a group in your Active Directory to 'AuthorizedRoles' that should be able to access this key
-    - Or you can add a list of email address that should have access to the key
-    - Modify the value of 'PublicPem' to be a valid public key in PEM format
-    - Modify the value of 'PrivatePem' to be a valid private key in PEM format
+    - If running on prem then add a group in your Active Directory to 'AuthorizedRoles' that should be able to access this key.
+        Roles should be comma delimited.  Ex. "AuthorizedRoles": ["role1","role2"]
+    - Or you can add a list of email address to 'AuthorizedEmailAddress' that should have access to the key
+        Emails should be comma delimited. Ex. "AuthorizedEmailAddress": ["email1@company.com","email2@company.com"]
+    - Remove whichever one you did not use - 'AuthorizedEmailAddress' or 'AuthorizedRoles'.  Both cannot be present
+    - Modify the value of 'PublicPem' to be a valid public key in PEM format, on a single line
+    - Modify the value of 'PrivatePem' to be a valid private key in PEM format, on a single line
 - Go to Debug -> Start Debugging
 
 ## Contributing
