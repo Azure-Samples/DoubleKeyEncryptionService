@@ -83,6 +83,7 @@ namespace CustomerKeyStore
                 Configuration.Bind("AzureAd", options);
                 options.Audience = Configuration["JwtAudience"];
                 options.TokenValidationParameters.ValidateIssuerSigningKey = true;
+                options.Challenge = "Bearer resource=\"" + Configuration["JwtAudience"] + "\", authorization=\"" + Configuration["JwtAuthorization"] + "\", realm=\"" + Configuration["JwtAudience"] + "\"";
                 options.Events = new JwtBearerEvents
                 {
                     OnChallenge = context =>
