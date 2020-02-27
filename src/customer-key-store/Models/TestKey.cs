@@ -1,14 +1,16 @@
-using System;
-using System.Collections.Generic;
-
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 namespace Microsoft.InformationProtection.Web.Models
 {
+    using System;
+    using Microsoft.InformationProtection.Web.Models.Extensions;
+    using sg = System.Globalization;
     public class TestKey : IKey
-    {        
+    {
         private string privateKeyPem;
         private string publicKeyPem;
         private PublicKey storedPublicKey = null;
-        System.Security.Cryptography.RSA cryptoEngine = null;
+        private System.Security.Cryptography.RSA cryptoEngine = null;
 
         public TestKey(string publicKey, string privateKey)
         {
@@ -16,30 +18,13 @@ namespace Microsoft.InformationProtection.Web.Models
             privateKeyPem = privateKey;
         }
 
-        void IntializeCrypto()
-        {
-            if(cryptoEngine == null)
-            {
-                var tempCryptoEngine = System.Security.Cryptography.RSA.Create();
-                byte[] privateKeyBytes = System.Convert.FromBase64String(privateKeyPem);
-                tempCryptoEngine.ImportRSAPrivateKey(privateKeyBytes, out int bytesRead);
-
-                var RSAKeyInfo = tempCryptoEngine.ExportParameters(false);
-                var exponent = ByteArrayToUInt(RSAKeyInfo.Exponent);
-                var modulus = Convert.ToBase64String(RSAKeyInfo.Modulus);
-                storedPublicKey = new PublicKey(modulus, exponent);
-
-                cryptoEngine = tempCryptoEngine;
-            }
-        }
-        
         public PublicKey GetPublicKey()
         {
             IntializeCrypto();
 
             return storedPublicKey;
         }
-        
+
         public byte[] Decrypt(byte[] encryptedData)
         {
             IntializeCrypto();
@@ -70,6 +55,23 @@ namespace Microsoft.InformationProtection.Web.Models
             }
 
             return retVal;
+        }
+
+        private void IntializeCrypto()
+        {
+            if(cryptoEngine == null)
+            {
+                var tempCryptoEngine = System.Security.Cryptography.RSA.Create();
+                byte[] privateKeyBytes = System.Convert.FromBase64String(privateKeyPem);
+                tempCryptoEngine.ImportRSAPrivateKey(privateKeyBytes, out int bytesRead);
+
+                var rsaKeyInfo = tempCryptoEngine.ExportParameters(false);
+                var exponent = ByteArrayToUInt(rsaKeyInfo.Exponent);
+                var modulus = Convert.ToBase64String(rsaKeyInfo.Modulus);
+                storedPublicKey = new PublicKey(modulus, exponent);
+
+                cryptoEngine = tempCryptoEngine;
+            }
         }
     }
 }
