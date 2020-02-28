@@ -35,7 +35,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Prerequisites
 
-- Install .NET Core 2.1 SDK by following the instructions at [dot.net/core](https://dotnet.microsoft.com/download/dotnet-core/2.1)
+- Install .NET Core 3.1 SDK by following the instructions at [dot.net/core](https://dotnet.microsoft.com/download/dotnet-core/3.1)
 - Install [Visual Studio Code](https://code.visualstudio.com/)
 
 ## Setup
