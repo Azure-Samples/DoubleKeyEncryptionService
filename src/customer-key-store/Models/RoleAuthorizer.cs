@@ -27,29 +27,15 @@ namespace Microsoft.InformationProtection.Web.Models
             roles.Add(role);
         }
 
-        public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
+        public void CanUserAccessKey(string sid)
         {
-            user.ThrowIfNull(nameof(user));
+            sid.ThrowIfNull(nameof(sid));
 
             using(DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath))
             {
                 using(DirectorySearcher dSearch = new DirectorySearcher(entry))
                 {
-                    bool claimFound = false;
-                    foreach(var claim in user.Claims)
-                    {
-                        if(claim.Type == SidClaim)
-                        {
-                            claimFound = true;
-                            dSearch.Filter = "(objectSid=" + claim.Value + ")";
-                            break;
-                        }
-                    }
-
-                    if(!claimFound)
-                    {
-                        throw new System.ArgumentException(SidClaim + " claim not found");
-                    }
+                    dSearch.Filter = "(objectSid=" + sid + ")";
 
                     var result = dSearch.FindOne();
 
@@ -59,19 +45,19 @@ namespace Microsoft.InformationProtection.Web.Models
                     }
 
                     var memberof = result.Properties[RoleProperty];
-                    bool roleFound = false;
+                    bool success = false;
                     foreach(var member in memberof)
                     {
                         //Split out the first part of the role to the comma
                         var role = GetRole(member.ToString());
-                        if(roles.Contains(role))
+                        if(!string.IsNullOrEmpty(role) && roles.Contains(role))
                         {
-                            roleFound = true;
+                            success = true;
                             break;
                         }
                     }
 
-                    if(!roleFound)
+                    if(!success)
                     {
                         throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
                     }
@@ -79,29 +65,79 @@ namespace Microsoft.InformationProtection.Web.Models
             }
         }
 
-        private string GetRole(string memberOf)
+        public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
         {
-            string role = string.Empty;
-            var splitStrings = memberOf.Split(",");
+            user.ThrowIfNull(nameof(user));
 
-            //This function obtains the first string in a comma separated string of strings
-            //A comma can be escaped by a \ and in that case it should continue searching
+            string sid = null;
 
-            for(int index = 0; index < splitStrings.Length; index++)
+            foreach(var claim in user.Claims)
             {
-                role += splitStrings[index];
-                if(role.Length == 0 || role[role.Length - 1] != '\\')
+                if(claim.Type == SidClaim)
                 {
+                    sid = claim.Value;
                     break;
-                }
-                else
-                {
-                    //Delimited comma is present, remove the delimiter (\) and add the comma back. Continue searching
-                    role = role.Substring(0, role.Length - 1) + ",";
                 }
             }
 
-            return role;
+            if(sid == null)
+            {
+                throw new System.ArgumentException(SidClaim + " claim not found");
+            }
+
+            CanUserAccessKey(sid);
+        }
+
+        private static string ParseCN(string distinguishedName)
+        {
+            distinguishedName.ThrowIfNull(nameof(distinguishedName));
+
+            //The CN is terminated by a comma
+            //A comma can be part of the CN if it is escaped by \ in which case continue searching, adding the comma without the \
+            int commaIndex = distinguishedName.IndexOf("CN=", System.StringComparison.InvariantCulture);
+
+            if(commaIndex == -1)
+            {
+                return string.Empty;
+            }
+
+            System.Text.StringBuilder role = new System.Text.StringBuilder();
+            commaIndex += 3; //Skip over CN=
+            do
+            {
+                var newCommaIndex = distinguishedName.IndexOf(",", commaIndex, System.StringComparison.InvariantCulture);
+
+                if(newCommaIndex != -1)
+                {
+                    if(distinguishedName[newCommaIndex - 1] == '\\')
+                    {
+                        //Found a delimited comma, skip over, add it to the resulting string, and continue searching
+                        role.Append(distinguishedName.Substring(commaIndex, newCommaIndex - commaIndex - 1)).Append(",");
+                        newCommaIndex++;
+                    }
+                    else
+                    {
+                        role.Append(distinguishedName.Substring(commaIndex, newCommaIndex - commaIndex));
+                        break;
+                    }
+                }
+                else
+                {
+                    role.Append(distinguishedName.Substring(commaIndex));
+                    break;
+                }
+
+                commaIndex = newCommaIndex;
+            }
+            while(commaIndex > 0 && commaIndex < distinguishedName.Length);
+
+            return role.ToString();
+        }
+
+        public static string GetRole(string memberOf)
+        {
+            memberOf.ThrowIfNull(nameof(memberOf));
+            return ParseCN(memberOf);
         }
     }
 }
