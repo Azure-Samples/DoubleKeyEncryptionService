@@ -59,6 +59,10 @@ Outline the file contents of the repository. It helps users navigate the codebas
     - Modify the value of 'PrivatePem' to be a valid private key in PEM format, on a single line
 - Go to Debug -> Start Debugging
 
+## Validating a deployment
+Run src\customer-key-store\scripts\key_store_tester.ps1 mykeystoreurl/mykey to validate the key store settings
+Ex. key_store_tester.ps1 https://mycustomerkeystore.com/mykey
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
