@@ -43,51 +43,52 @@ try {
 
 Write-Host "Received content from url: $($publicKeyResponse.Content)"
 
-$parser = New-Object Web.Script.Serialization.JavaScriptSerializer
-$json = $parser.DeserializeObject($publicKeyResponse.Content)
+$jsonResponse = ConvertFrom-Json -InputObject $publicKeyResponse.Content
 
-if (-Not ($json.ContainsKey("key"))) {
+if (-Not ([bool]($jsonResponse -match "key"))) {
   Write-Host -ForegroundColor red "Validation failure: Response does not contain the key"
   exit
 }
 
-if (-Not ($json["key"].ContainsKey("kty"))) {
+$jsonKeyResponse = $jsonResponse.key
+
+if (-Not ([bool]($jsonKeyResponse -match "kty"))) {
   Write-Host -ForegroundColor red "Validation failure: Response does not contain the key type"
   exit
 }
 
-if (-Not ($json["key"].ContainsKey("n"))) {
+if (-Not ([bool]($jsonKeyResponse -match "n"))) {
   Write-Host -ForegroundColor red "Validation failure: Response does not contain the modulus"
   exit
 }
 
-if (-Not ($json["key"].ContainsKey("e"))) {
+if (-Not ([bool]($jsonKeyResponse -match "e"))) {
   Write-Host -ForegroundColor red "Validation failure: Response does not contain the exponent"
   exit
 }
 
-if (-Not ($json["key"].ContainsKey("alg"))) {
+if (-Not ([bool]($jsonKeyResponse -match "alg"))) {
   Write-Host -ForegroundColor red "Validation failure: Response does not contain the algorithm"
   exit
 }
 
-if (-Not ($json["key"].ContainsKey("kid"))) {
+if (-Not ([bool]($jsonKeyResponse -match "kid"))) {
   Write-Host -ForegroundColor red "Validation failure: Response does not contain the key id"
   exit
 }
 
-if ($json["key"]["kty"] -ne "RSA") {
+if ($jsonKeyResponse.kty -ne "RSA") {
   Write-Host -ForegroundColor red "Validation failure: Invalid key type"
 }
 
-if ($json["key"]["alg"] -ne "RS256") {
+if ($jsonKeyResponse.alg -ne "RS256") {
   Write-Host -ForegroundColor red "Validation failure: Invalid key algorithm"
 }
 
 Write-Host "Public key API validation complete"
 
 try {
-  $decryptUrl = "$($json[`"key`"][`"kid`"])/decrypt"
+  $decryptUrl = "$($jsonKeyResponse.kid)/decrypt"
   Write-Host "Attempting to access url: $($decryptUrl)"
   $decryptResponse = Invoke-WebRequest -uri $decryptUrl -Method 'POST'
   Write-Host -ForegroundColor red "Validation failure: Decryption unexpected response"
