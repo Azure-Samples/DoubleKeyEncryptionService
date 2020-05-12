@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 function ParseAuthResponse
 {
     param(
@@ -30,6 +33,11 @@ Ex. .\key_store_tester.ps1 https://mykeystoreurl.com/mykey1
 }
 
 Write-Host "Validation request started: $($args[0])"
+
+if (-Not $args[0].Trim().StartsWith("https")) {
+  Write-Host -ForegroundColor red "Validation failure: Url must be begin with 'https'"
+  exit
+}
 
 try {
   $publicKeyResponse = Invoke-WebRequest -uri $args[0] -Method 'GET'
