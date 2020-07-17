@@ -131,13 +131,20 @@ try {
         exit
       }
 
-      $authResourceUri = [System.Uri]$responeFields["resource"]
+      $resourceAuthField = $responeFields["resource"]
+
+      if (-Not ($resourceAuthField.StartsWith("https://"))) {
+        Write-Host -ForegroundColor red "Resource auth field ($($resourceAuthField)) must contains 'https://'.  Ensure that the `"JwtAudience`" value in appsettings.json contains 'https://'"
+        exit
+      }
+
+      $authResourceUri = [System.Uri]$resourceAuthField
       $decryptUrlUri = [System.Uri]$decryptUrl
 
       Write-Host "Validated parsed resource: $($authResourceUri)"
 
       if ($authResourceUri.host -ne $decryptUrlUri.host) {
-        Write-Host -ForegroundColor red "Hostname mismatch between auth resource ($($authResourceUri.host)) and key id ($($decryptUrlUri.host)).  Ensure that the `"JwtAudience`" value in appsettings.json matches the host where the key store has been published"
+        Write-Host -ForegroundColor red "Hostname mismatch between auth resource ($($authResourceUri.host)) and key url ($($decryptUrlUri.host)).  Ensure that the `"JwtAudience`" value in appsettings.json matches the host where the key store has been published"
         exit
       }
     }
