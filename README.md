@@ -20,6 +20,10 @@ Taxonomies for products and languages: https://review.docs.microsoft.com/new-hop
 
 The customer key store is used for double key encryption in Azure RMS.  This key is kept under your control and not exposed to Microsoft.  
 
+## Warning
+
+IMPORTANT NOTICE: Please note that this project includes code for encryption libraries. You are responsible for complying with all applicable international and national laws that apply to this software, including the U.S. Export Administration Regulations, as well as end-user, end use and destination restrictions by U.S. and other governments.
+
 ## Contents
 
 Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
