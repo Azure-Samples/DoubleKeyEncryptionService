@@ -8,7 +8,7 @@ namespace Microsoft.InformationProtection.Web.Controllers
     using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.AspNetCore.Mvc;
     using ippw = Microsoft.InformationProtection.Web.Models;
-    //https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-protected-web-api-app-configuration
+    //https://docs.microsoft.com/azure/active-directory/develop/scenario-protected-web-api-app-configuration
     public class KeysController : Controller
     {
         private readonly ippw.KeyManager keyManager;

@@ -4,7 +4,7 @@ languages:
 - csharp
 products:
 - dotnet
-description: "Customer key store for RMS Double Key Encryption"
+description: "Key store for Double Key Encryption"
 urlFragment: ""
 ---
 
@@ -18,24 +18,22 @@ Guidance on onboarding samples to docs.microsoft.com/samples: https://review.doc
 Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
 -->
 
-The customer key store is used for double key encryption in Azure RMS.  This key is kept under your control and not exposed to Microsoft.  
+The key store is used for double key encryption for Microsoft 365. You keep the key under your control. The key is never exposed to Microsoft.
 
 ## Warning
 
-IMPORTANT NOTICE: Please note that this project includes code for encryption libraries. You are responsible for complying with all applicable international and national laws that apply to this software, including the U.S. Export Administration Regulations, as well as end-user, end use and destination restrictions by U.S. and other governments.
+IMPORTANT NOTICE: This project includes code for encryption libraries. You are responsible for complying with all applicable international and national laws that apply to this software, including the U.S. Export Administration Regulations, as well as end-user, end use and destination restrictions by U.S. and other governments.
 
 ## Contents
 
-Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
-
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `src`             | Sample source code.                        |
-| `.gitignore`      | Define what to ignore at commit time.      |
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md`       | This README file.                          |
-| `LICENSE`         | The license for the sample.                |
+| File/folder         | Description                                                                             |
+|---------------------|-----------------------------------------------------------------------------------------|
+| `src`               | Contains the DKE service source code.                                                   |
+| `.gitignore`        | Identifies what to ignore at commit time.                                               |
+| `CODE_OF_CONDUCT.md`| Outlines expectations for participation in Microsoft-managed open source communities.   |
+| `README.md`         | This README file.                                                                       |
+| `LICENSE`           | The license for the DKE service software.                                               |
+| `SECURITY.md`       | Describes how to contact Microsoft to report a security vulnerability.                  |
 
 ## Prerequisites
 
@@ -44,7 +42,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Setup
 
-- In Visual Studio Code extensions install C# and nuget package manager
+- In Visual Studio Code extensions install C# and NuGet package manager
 
 ## Running the sample
 
@@ -78,4 +76,4 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 [Coding Guidelines](https://blogs.msdn.microsoft.com/brada/2005/01/26/internal-coding-guidelines/)
-[Capitalization Conventions](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/capitalization-conventions)
+[Capitalization Conventions](https://docs.microsoft.com/dotnet/standard/design-guidelines/capitalization-conventions)
