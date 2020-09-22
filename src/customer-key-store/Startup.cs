@@ -13,6 +13,7 @@ namespace CustomerKeyStore
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using ippw = Microsoft.InformationProtection.Web.Models;
 
     public class Startup
@@ -25,7 +26,7 @@ namespace CustomerKeyStore
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public static void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -65,13 +66,14 @@ namespace CustomerKeyStore
                 options.MinimumSameSitePolicy = SameSiteMode.Strict;
             });
 
-            #if (USE_TEST_KEYS)
+            #if USE_TEST_KEYS
             #error !!!!!!!!!!!!!!!!!!!!!! Use of test keys is only supported for testing, DO NOT USE FOR PRODUCTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             services.AddSingleton<ippw.IKeyStore, ippw.TestKeyStore>();
             #endif
             services.AddTransient<ippw.KeyManager, ippw.KeyManager>();
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddAuthentication(sharedOptions =>
             {

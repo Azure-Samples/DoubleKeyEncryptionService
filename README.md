@@ -39,7 +39,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Prerequisites
 
-- Install .NET Core 2.1 SDK by following the instructions at [dot.net/core](https://dotnet.microsoft.com/download/dotnet-core/2.1)
+- Install .NET Core 3.1 SDK by following the instructions at [dot.net/core](https://dotnet.microsoft.com/download/dotnet-core/3.1)
 - Install [Visual Studio Code](https://code.visualstudio.com/)
 
 ## Setup
@@ -62,6 +62,10 @@ Outline the file contents of the repository. It helps users navigate the codebas
     - Modify the value of 'PublicPem' to be a valid public key in PEM format, on a single line
     - Modify the value of 'PrivatePem' to be a valid private key in PEM format, on a single line
 - Go to Debug -> Start Debugging
+
+## Validating a deployment
+Run src\customer-key-store\scripts\key_store_tester.ps1 mykeystoreurl/mykey to validate the key store settings
+Ex. key_store_tester.ps1 https://mycustomerkeystore.com/mykey
 
 ## Contributing
 
