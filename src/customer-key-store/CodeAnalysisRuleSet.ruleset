@@ -18,5 +18,6 @@
     <Rule Id="CS1591" Action="None" />  <!-- Missing xml documentation -->
     <Rule Id="CS1712" Action="None" />  <!-- Missing xml documentation -->
     <Rule Id="SA1600" Action="None" />  <!-- Missing xml documentation -->
+    <Rule Id="SA1629" Action="None" />  <!-- Documentation should end with a period -->
   </Rules>
 </RuleSet>
