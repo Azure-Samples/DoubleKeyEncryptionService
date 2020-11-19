@@ -28,9 +28,9 @@ namespace Microsoft.InformationProtection.Web.Models
         /// Gets the Cache.
         /// </summary>
         /// <remarks>
-        /// The caching information.
+        /// Details how the public key is cached locally
         /// Optional.
-        /// If omitted then caching of the key is disabled and decryption of the content will always go to the key store
+        /// If omitted then caching of the public key is disabled and encryption of content will always require a call to the key store
         /// </remarks>
         [Newtonsoft.Json.JsonProperty("cache", NullValueHandling=Newtonsoft.Json.NullValueHandling.Ignore)]
         public PublicKeyCache Cache { get; private set; }
@@ -114,7 +114,8 @@ namespace Microsoft.InformationProtection.Web.Models
         /// Gets the expiration.
         /// </summary>
         /// <remarks>
-        /// The expiration date and time in format yyyy-MM-ddTHH:mm:ss
+        /// This member specifies the expiration date and time in format yyyy-MM-ddTHH:mm:ss - after which a locally stored public key will expire and require a call to 
+        //  the customer key store to obtain a newer version.
         /// Required.
         /// </remarks>
         [Newtonsoft.Json.JsonProperty("exp")]
