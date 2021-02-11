@@ -65,11 +65,10 @@ namespace CustomerKeyStore
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.Strict;
             });
-
-            #if USE_TEST_KEYS
-            #error !!!!!!!!!!!!!!!!!!!!!! Use of test keys is only supported for testing, DO NOT USE FOR PRODUCTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //#if USE_TEST_KEYS
+            //#error !!!!!!!!!!!!!!!!!!!!!! Use of test keys is only supported for testing, DO NOT USE FOR PRODUCTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             services.AddSingleton<ippw.IKeyStore, ippw.TestKeyStore>();
-            #endif
+            //#endif
             services.AddTransient<ippw.KeyManager, ippw.KeyManager>();
             services.AddMvc(options => options.EnableEndpointRouting = false);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
@@ -86,6 +85,22 @@ namespace CustomerKeyStore
                 options.Audience = Configuration["JwtAudience"];
                 options.TokenValidationParameters.ValidateIssuerSigningKey = true;
                 options.Challenge = "Bearer resource=\"" + Configuration["JwtAudience"] + "\", authorization=\"" + Configuration["JwtAuthorization"] + "\", realm=\"" + Configuration["JwtAudience"] + "\"";
+
+                var proxyConfig = Configuration.GetSection("Proxy");
+                if(proxyConfig != null && proxyConfig.Exists())
+                {
+                    options.BackchannelHttpHandler = new System.Net.Http.HttpClientHandler
+                    {
+                        UseProxy = true,
+                        Proxy = new System.Net.WebProxy
+                        {
+                            Address = new System.Uri(proxyConfig["address"]),
+                            BypassProxyOnLocal = true,
+                            UseDefaultCredentials = true,
+                        },
+                    };
+                }
+
                 options.Events = new JwtBearerEvents
                 {
                     OnChallenge = context =>
