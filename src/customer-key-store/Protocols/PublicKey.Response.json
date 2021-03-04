@@ -1,0 +1,12 @@
+{
+  "key":{
+     "kty":"RSA",
+     "n":"wP4ir0aynve6Cpv3ZcBo5+HDue7OA6ogQetNkql1ptfKXilQ2N6x+wDTszcrJlb672l+ckUV5Gjn+ohhFUh0hx6B3rTNKVyxJiGq8S+MRXrTl0UGjWjFED7fYZ2nYZPigu1VHdm3HgBVZdeR8TMr1uIjDHxhWgen2utnTvacn5r8X079ImwpbhilrYBUvt9q42r/CxRp+axsMY3ozkGYsSZ/vXsgjSN0Nbn+9cwHi+XeE2PcjAOnaxUTKVcxjcZvRE+y2FcwgT+nVfJub4ZvRjz9lAbhdDNUS2ZrisAtHVRWJx1ArAMHH7OYg41LoA9+wmBoB04cEzi3JkJkqNCwtw==",
+     "e":65537,
+     "alg":"RS256",
+     "kid":"https://localhost:5001/TestKey1/F2DBF8CB-7B06-4ABA-B93A-CACAD13CD7BB"
+  },
+  "cache":{
+     "exp":"2020-11-21T21:15:55"
+  }
+}
