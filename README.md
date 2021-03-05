@@ -4,21 +4,17 @@ languages:
 - csharp
 products:
 - dotnet
-description: "Customer key store for RMS Double Key Encryption"
+description: "Key store for Double Key Encryption"
 urlFragment: ""
 ---
 
-# Customer Key Store to enable a second key for use in Azure RMS
+# Source code repository for the Double Key Encryption (DKE) service for Microsoft 365
 
-<!-- 
-Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
+Use this repository to download the DKE service. Once you download, install, and set up the DKE service, you keep your keys under your control. This way, your keys are never exposed to Microsoft. Follow the instructions at https://aka.ms/dke to get started.
 
-Guidance on onboarding samples to docs.microsoft.com/samples: https://review.docs.microsoft.com/help/onboard/admin/samples/process/onboarding?branch=master
+## Warning
 
-Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
--->
-
-The customer key store is used for double key encryption in Azure RMS.  This key is kept under your control and not exposed to Microsoft.  
+IMPORTANT NOTICE: This project includes code for encryption libraries. You are responsible for complying with all applicable international and national laws that apply to this software, including the U.S. Export Administration Regulations, as well as end-user, end use and destination restrictions by U.S. and other governments.
 
 ## Warning
 
@@ -69,7 +65,7 @@ Ex. key_store_tester.ps1 https://mycustomerkeystore.com/mykey
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
@@ -82,4 +78,4 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 [Coding Guidelines](https://blogs.msdn.microsoft.com/brada/2005/01/26/internal-coding-guidelines/)
-[Capitalization Conventions](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/capitalization-conventions)
+[Capitalization Conventions](https://docs.microsoft.com/dotnet/standard/design-guidelines/capitalization-conventions)
