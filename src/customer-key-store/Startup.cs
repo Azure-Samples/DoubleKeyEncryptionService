@@ -69,6 +69,7 @@ namespace CustomerKeyStore
             #error !!!!!!!!!!!!!!!!!!!!!! Use of test keys is only supported for testing, DO NOT USE FOR PRODUCTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             services.AddSingleton<ippw.IKeyStore, ippw.TestKeyStore>();
             #endif
+            
             services.AddTransient<ippw.KeyManager, ippw.KeyManager>();
             services.AddMvc(options => options.EnableEndpointRouting = false);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
