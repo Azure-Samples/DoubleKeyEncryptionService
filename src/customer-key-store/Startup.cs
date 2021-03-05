@@ -65,7 +65,7 @@ namespace CustomerKeyStore
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.Strict;
             });
-            
+
             #if USE_TEST_KEYS
             #error !!!!!!!!!!!!!!!!!!!!!! Use of test keys is only supported for testing, DO NOT USE FOR PRODUCTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             services.AddSingleton<ippw.IKeyStore, ippw.TestKeyStore>();
