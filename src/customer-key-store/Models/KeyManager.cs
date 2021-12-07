@@ -4,6 +4,7 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     using System;
     using System.Security.Claims;
+    using System.Threading.Tasks;
     using Microsoft.InformationProtection.Web.Models.Extensions;
     using sg = System.Globalization;
 
@@ -39,7 +40,7 @@ namespace Microsoft.InformationProtection.Web.Models
             return new KeyData(publicKey, cache);
         }
 
-        public DecryptedData Decrypt(ClaimsPrincipal user, string keyName, string keyId, EncryptedData encryptedData)
+        public async Task<DecryptedData> Decrypt(ClaimsPrincipal user, string keyName, string keyId, EncryptedData encryptedData)
         {
             user.ThrowIfNull(nameof(user));
             keyName.ThrowIfNull(nameof(keyName));
@@ -48,7 +49,7 @@ namespace Microsoft.InformationProtection.Web.Models
 
             var keyData = keyStore.GetKey(keyName, keyId);
 
-            keyData.KeyAuth.CanUserAccessKey(user, keyData);
+            await keyData.KeyAuth.ProcessAccessRequest(user, keyData).ConfigureAwait(false);
 
             if (encryptedData.Algorithm != "RSA-OAEP-256")
             {

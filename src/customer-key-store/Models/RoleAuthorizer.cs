@@ -5,6 +5,7 @@ namespace Microsoft.InformationProtection.Web.Models
     using System.Collections.Generic;
     using System.DirectoryServices;
     using System.Security.Claims;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
     using Microsoft.InformationProtection.Web.Models.Extensions;
     public class RoleAuthorizer : IAuthorizer
@@ -22,12 +23,18 @@ namespace Microsoft.InformationProtection.Web.Models
             ldapPath = configuration["RoleAuthorizer:LDAPPath"];
         }
 
+        public static string GetRole(string memberOf)
+        {
+            memberOf.ThrowIfNull(nameof(memberOf));
+            return ParseCN(memberOf);
+        }
+
         public void AddRole(string role)
         {
             roles.Add(role);
         }
 
-        public void CanUserAccessKey(string sid)
+        public Task ProcessAccessRequest(string sid)
         {
             sid.ThrowIfNull(nameof(sid));
 
@@ -63,9 +70,11 @@ namespace Microsoft.InformationProtection.Web.Models
                     }
                 }
             }
+
+            return Task.FromResult(true);
         }
 
-        public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
+        public Task ProcessAccessRequest(ClaimsPrincipal user, KeyStoreData key)
         {
             user.ThrowIfNull(nameof(user));
 
@@ -85,7 +94,7 @@ namespace Microsoft.InformationProtection.Web.Models
                 throw new System.ArgumentException(SidClaim + " claim not found");
             }
 
-            CanUserAccessKey(sid);
+            return ProcessAccessRequest(sid);
         }
 
         private static string ParseCN(string distinguishedName)
@@ -132,12 +141,6 @@ namespace Microsoft.InformationProtection.Web.Models
             while(commaIndex > 0 && commaIndex < distinguishedName.Length);
 
             return role.ToString();
-        }
-
-        public static string GetRole(string memberOf)
-        {
-            memberOf.ThrowIfNull(nameof(memberOf));
-            return ParseCN(memberOf);
         }
     }
 }
