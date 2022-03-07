@@ -22,6 +22,12 @@ namespace Microsoft.InformationProtection.Web.Models
             ldapPath = configuration["RoleAuthorizer:LDAPPath"];
         }
 
+        public static string GetRole(string memberOf)
+        {
+            memberOf.ThrowIfNull(nameof(memberOf));
+            return ParseCN(memberOf);
+        }
+
         public void AddRole(string role)
         {
             roles.Add(role);
@@ -132,12 +138,6 @@ namespace Microsoft.InformationProtection.Web.Models
             while(commaIndex > 0 && commaIndex < distinguishedName.Length);
 
             return role.ToString();
-        }
-
-        public static string GetRole(string memberOf)
-        {
-            memberOf.ThrowIfNull(nameof(memberOf));
-            return ParseCN(memberOf);
         }
     }
 }
