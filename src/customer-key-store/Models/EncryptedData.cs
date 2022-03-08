@@ -8,7 +8,7 @@ namespace Microsoft.InformationProtection.Web.Models
     public class EncryptedData
     {
         /// <summary>
-        /// Gets the algorithm
+        /// Gets or sets the algorithm
         /// </summary>
         /// <remarks>
         /// The algorithm used to encrypt the data.  Currently only RSA-OAEP-256 is supported
@@ -20,7 +20,7 @@ namespace Microsoft.InformationProtection.Web.Models
         public string Algorithm { get; set; }
 
         /// <summary>
-        /// Gets the value
+        /// Gets or sets the value
         /// </summary>
         /// <remarks>
         /// The encrypted data in base 64 format
