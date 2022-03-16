@@ -20,12 +20,10 @@ namespace Microsoft.InformationProtection.Web.Models
             configuration.ThrowIfNull(nameof(configuration));
 
             ldapPath = configuration["RoleAuthorizer:LDAPPath"];
-        }
-
-        public static string GetRole(string memberOf)
-        {
-            memberOf.ThrowIfNull(nameof(memberOf));
-            return ParseCN(memberOf);
+            if(ldapPath == null)
+            {
+                throw new System.ArgumentException("LDAPPath is required");
+            }
         }
 
         public void AddRole(string role)
@@ -37,37 +35,21 @@ namespace Microsoft.InformationProtection.Web.Models
         {
             sid.ThrowIfNull(nameof(sid));
 
-            using(DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath))
+            bool success = false;
+            foreach(var member in GetMembersOfFromSID(sid))
             {
-                using(DirectorySearcher dSearch = new DirectorySearcher(entry))
+                //Split out the first part of the role to the comma
+                var role = ParseCN(member);
+                if(!string.IsNullOrEmpty(role) && roles.Contains(role))
                 {
-                    dSearch.Filter = "(objectSid=" + sid + ")";
-
-                    var result = dSearch.FindOne();
-
-                    if(result == null)
-                    {
-                        throw new System.ArgumentException("User not found");
-                    }
-
-                    var memberof = result.Properties[RoleProperty];
-                    bool success = false;
-                    foreach(var member in memberof)
-                    {
-                        //Split out the first part of the role to the comma
-                        var role = GetRole(member.ToString());
-                        if(!string.IsNullOrEmpty(role) && roles.Contains(role))
-                        {
-                            success = true;
-                            break;
-                        }
-                    }
-
-                    if(!success)
-                    {
-                        throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
-                    }
+                    success = true;
+                    break;
                 }
+            }
+
+            if(!success)
+            {
+                throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
             }
         }
 
@@ -94,7 +76,7 @@ namespace Microsoft.InformationProtection.Web.Models
             CanUserAccessKey(sid);
         }
 
-        private static string ParseCN(string distinguishedName)
+        protected static string ParseCN(string distinguishedName)
         {
             distinguishedName.ThrowIfNull(nameof(distinguishedName));
 
@@ -138,6 +120,35 @@ namespace Microsoft.InformationProtection.Web.Models
             while(commaIndex > 0 && commaIndex < distinguishedName.Length);
 
             return role.ToString();
+        }
+
+        protected virtual IEnumerable<string> GetMembersOfFromSID(string sid)
+        {
+            sid.ThrowIfNull(nameof(sid));
+            List<string> membersOf = new List<string>();
+
+            using(DirectoryEntry entry = new DirectoryEntry("LDAP://" + ldapPath))
+            {
+                using(DirectorySearcher dSearch = new DirectorySearcher(entry))
+                {
+                    dSearch.Filter = "(objectSid=" + sid + ")";
+
+                    var result = dSearch.FindOne();
+
+                    if(result == null)
+                    {
+                        throw new System.ArgumentException("User not found");
+                    }
+
+                    var memberof = result.Properties[RoleProperty];
+                    foreach(var member in memberof)
+                    {
+                        membersOf.Add(member.ToString());
+                    }
+                }
+            }
+
+            return membersOf;
         }
     }
 }
