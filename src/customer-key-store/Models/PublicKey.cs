@@ -114,8 +114,8 @@ namespace Microsoft.InformationProtection.Web.Models
         /// Gets the expiration.
         /// </summary>
         /// <remarks>
-        /// This member specifies the expiration date and time in format yyyy-MM-ddTHH:mm:ss - after which a locally stored public key will expire and require a call to 
-        //  the customer key store to obtain a newer version.
+        /// This member specifies the expiration date and time in format yyyy-MM-ddTHH:mm:ss - after which a locally stored public key will expire and require a call to
+        ///  the customer key store to obtain a newer version.
         /// Required.
         /// </remarks>
         [Newtonsoft.Json.JsonProperty("exp")]
