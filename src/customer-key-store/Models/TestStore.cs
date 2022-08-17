@@ -140,7 +140,10 @@ namespace Microsoft.InformationProtection.Web.Models
         {
             keyAuth.ThrowIfNull(nameof(keyAuth));
 
-            keys.Add(keyName, new Dictionary<string, KeyStoreData>());
+            if(!keys.ContainsKey(keyName))
+            {
+                keys.Add(keyName, new Dictionary<string, KeyStoreData>());
+            }
 
             keys[keyName][keyId] = new KeyStoreData(
                                                 new TestKey(publicKey, privateKey),
