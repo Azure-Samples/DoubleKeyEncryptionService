@@ -4,6 +4,7 @@ namespace Microsoft.InformationProtection.Web.Models
 {
     using System.Collections.Generic;
     using System.Security.Claims;
+    using System.Threading.Tasks;
 
     using Microsoft.InformationProtection.Web.Models.Extensions;
     public class EmailAuthorizer : IAuthorizer
@@ -12,14 +13,7 @@ namespace Microsoft.InformationProtection.Web.Models
         private const string UpnClaim = ClaimTypes.Upn;
         private HashSet<string> validEmails = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
-        public void AddEmail(string email)
-        {
-            email.ThrowIfNull(nameof(email));
-
-            validEmails.Add(email.Trim());
-        }
-
-        public void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key)
+        public static string GetEmailFromClaims(ClaimsPrincipal user)
         {
             string email = null;
 
@@ -39,6 +33,20 @@ namespace Microsoft.InformationProtection.Web.Models
                 }
             }
 
+            return email;
+        }
+
+        public void AddEmail(string email)
+        {
+            email.ThrowIfNull(nameof(email));
+
+            validEmails.Add(email.Trim());
+        }
+
+        public Task ProcessAccessRequest(ClaimsPrincipal user, KeyStoreData key)
+        {
+            string email = EmailAuthorizer.GetEmailFromClaims(user);
+
             if(email == null)
             {
                 throw new System.ArgumentException("The email or upn claim is required");
@@ -48,6 +56,8 @@ namespace Microsoft.InformationProtection.Web.Models
             {
                 throw new CustomerKeyStore.Models.KeyAccessException("User does not have access to the key");
             }
+
+            return Task.FromResult(true);
         }
     }
 }

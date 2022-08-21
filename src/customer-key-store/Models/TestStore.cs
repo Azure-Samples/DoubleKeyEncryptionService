@@ -57,6 +57,20 @@ namespace Microsoft.InformationProtection.Web.Models
                     }
                 }
 
+                var pushNotifications = testKey.GetSection("PushNotificationService");
+                if(pushNotifications != null && pushNotifications.Exists())
+                {
+                    if(keyAuth == null)
+                    {
+                        keyAuth = new PushAuthorizer(pushNotifications.Value);
+                    }
+                    else
+                    {
+                        //Currently, push authorizer always comes second.
+                        keyAuth = new MultiFactorAuthorizer(keyAuth, new PushAuthorizer(pushNotifications.Value));
+                    }
+                }
+
                 int? expirationTimeInDays = null;
                 var cacheTime = testKey["CacheExpirationInDays"];
                 if(cacheTime != null)

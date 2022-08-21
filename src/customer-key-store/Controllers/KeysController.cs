@@ -3,6 +3,7 @@
 namespace Microsoft.InformationProtection.Web.Controllers
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http.Extensions;
@@ -39,11 +40,11 @@ namespace Microsoft.InformationProtection.Web.Controllers
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public IActionResult Decrypt(string keyName, string keyId, [FromBody] ippw.EncryptedData encryptedData)
+        public async Task<IActionResult> Decrypt(string keyName, string keyId, [FromBody] ippw.EncryptedData encryptedData)
         {
             try
             {
-                var decryptedData = keyManager.Decrypt(HttpContext.User, keyName, keyId, encryptedData);
+                var decryptedData = await keyManager.Decrypt(HttpContext.User, keyName, keyId, encryptedData).ConfigureAwait(false);
 
                 return Ok(decryptedData);
             }
