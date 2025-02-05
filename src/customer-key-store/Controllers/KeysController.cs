@@ -23,6 +23,8 @@ namespace Microsoft.InformationProtection.Web.Controllers
         {
             try
             {
+                ippw.ProtocolVersionValidator.ValidateProtocolVersion(Request);
+
                 var publicKey = keyManager.GetPublicKey(GetRequestUri(Request), keyName);
 
                 return Ok(publicKey);
@@ -43,6 +45,8 @@ namespace Microsoft.InformationProtection.Web.Controllers
         {
             try
             {
+                ippw.ProtocolVersionValidator.ValidateProtocolVersion(Request);
+
                 var decryptedData = keyManager.Decrypt(HttpContext.User, keyName, keyId, encryptedData);
 
                 return Ok(decryptedData);
