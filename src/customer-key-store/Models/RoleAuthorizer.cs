@@ -41,7 +41,7 @@ namespace Microsoft.InformationProtection.Web.Models
             {
                 using(DirectorySearcher dSearch = new DirectorySearcher(entry))
                 {
-                    dSearch.Filter = "(objectSid=" + sid + ")";
+                    dSearch.Filter = "(objectSid=" + EscapeLdapSearchFilter(sid) + ")";
 
                     var result = dSearch.FindOne();
 
@@ -92,6 +92,43 @@ namespace Microsoft.InformationProtection.Web.Models
             }
 
             CanUserAccessKey(sid);
+        }
+
+        internal static string EscapeLdapSearchFilter(string value)
+        {
+            //Escape characters that have special meaning in an LDAP search filter (RFC 4515)
+            //to prevent LDAP injection when the value is concatenated into the filter.
+            System.Text.StringBuilder escaped = new System.Text.StringBuilder(value.Length * 2);
+
+            foreach(char current in value)
+            {
+                switch(current)
+                {
+                    case '\\':
+                        escaped.Append("\\5c");
+                        break;
+                    case '*':
+                        escaped.Append("\\2a");
+                        break;
+                    case '(':
+                        escaped.Append("\\28");
+                        break;
+                    case ')':
+                        escaped.Append("\\29");
+                        break;
+                    case '\0':
+                        escaped.Append("\\00");
+                        break;
+                    case '/':
+                        escaped.Append("\\2f");
+                        break;
+                    default:
+                        escaped.Append(current);
+                        break;
+                }
+            }
+
+            return escaped.ToString();
         }
 
         private static string ParseCN(string distinguishedName)
