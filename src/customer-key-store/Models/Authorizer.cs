@@ -4,8 +4,9 @@
 namespace Microsoft.InformationProtection.Web.Models
 {
     using System.Security.Claims;
+    using System.Threading.Tasks;
     public interface IAuthorizer
     {
-        void CanUserAccessKey(ClaimsPrincipal user, KeyStoreData key);
+        Task ProcessAccessRequest(ClaimsPrincipal user, KeyStoreData key);
     }
 }
