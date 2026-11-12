@@ -5,11 +5,11 @@
 ### Changed
 
 - Retarget the DKE service and its tests from .NET 8 to .NET 10 LTS.
-- Update the service's Microsoft framework package references to 10.0.15.
+- Update the service's Microsoft framework package references to `10.0.*` to use the latest stable .NET 10.0 package patches during dependency resolution.
 
 ### Added
 
-- Add `global.json` to select .NET SDK 10.0.404 or a later stable patch in the same feature band.
+- Add `global.json` to select .NET SDK 10.0.404 or later.
 - Document build prerequisites and deployment runtime maintenance in the README.
 
 ### Compatibility

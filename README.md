@@ -14,7 +14,7 @@ Use this repository to download the DKE service. Once you download, install, and
 
 ## .NET requirements
 
-This project targets .NET 10 LTS. To build the sample, install .NET SDK 10.0.404 or a later stable patch in the same feature band, as selected by `global.json`.
+This project targets .NET 10 LTS. To build the sample, install .NET SDK 10.0.404 or later.
 
 For framework-dependent deployments, use ASP.NET Core Runtime 10.0.15 or later in the .NET 10 release. If you host the sample in IIS, install the corresponding .NET 10 Hosting Bundle.
 
