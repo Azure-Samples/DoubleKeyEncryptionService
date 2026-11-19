@@ -86,6 +86,22 @@ namespace CustomerKeyStore
                 options.Audience = Configuration["JwtAudience"];
                 options.TokenValidationParameters.ValidateIssuerSigningKey = true;
                 options.Challenge = "Bearer resource=\"" + Configuration["JwtAudience"] + "\", authorization=\"" + Configuration["JwtAuthorization"] + "\", realm=\"" + Configuration["JwtAudience"] + "\"";
+
+                var proxyConfig = Configuration.GetSection("Proxy");
+                if(proxyConfig != null && proxyConfig.Exists())
+                {
+                    options.BackchannelHttpHandler = new System.Net.Http.HttpClientHandler
+                    {
+                        UseProxy = true,
+                        Proxy = new System.Net.WebProxy
+                        {
+                            Address = new System.Uri(proxyConfig["address"]),
+                            BypassProxyOnLocal = true,
+                            UseDefaultCredentials = true,
+                        },
+                    };
+                }
+
                 options.Events = new JwtBearerEvents
                 {
                     OnChallenge = context =>
