@@ -12,6 +12,14 @@ urlFragment: ""
 
 Use this repository to download the DKE service. Once you download, install, and set up the DKE service, you keep your keys under your control. This way, your keys are never exposed to Microsoft. Follow the instructions at https://aka.ms/dke to get started.
 
+## .NET requirements
+
+This project targets .NET 10 LTS. To build the sample, install .NET SDK 10.0.404 or later.
+
+For framework-dependent deployments, use ASP.NET Core Runtime 10.0.15 or later in the .NET 10 release. If you host the sample in IIS, install the corresponding .NET 10 Hosting Bundle.
+
+See [CHANGELOG.md](CHANGELOG.md) for changes and compatibility notes.
+
 ## Warning
 
 IMPORTANT NOTICE: This project includes code for encryption libraries. You are responsible for complying with all applicable international and national laws that apply to this software, including the U.S. Export Administration Regulations, as well as end-user, end use and destination restrictions by U.S. and other governments.
