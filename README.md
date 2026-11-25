@@ -20,6 +20,12 @@ For framework-dependent deployments, use ASP.NET Core Runtime 10.0.15 or later i
 
 See [CHANGELOG.md](CHANGELOG.md) for changes and compatibility notes.
 
+## REST API specification
+
+The request and response contract is documented in [docs/openapi.yaml](docs/openapi.yaml).
+It describes the public-key and decrypt endpoints, JWT authentication,
+and the JSON payloads needed to call or reimplement the service.
+
 ## Warning
 
 IMPORTANT NOTICE: This project includes code for encryption libraries. You are responsible for complying with all applicable international and national laws that apply to this software, including the U.S. Export Administration Regulations, as well as end-user, end use and destination restrictions by U.S. and other governments.
@@ -29,6 +35,7 @@ IMPORTANT NOTICE: This project includes code for encryption libraries. You are r
 | File or folder       | Description                                                                             |
 |----------------------|-----------------------------------------------------------------------------------------|
 | `src`                | Contains the DKE service source code.                                                   |
+| `docs/openapi.yaml`  | Defines the DKE service REST API in OpenAPI 3.0 format.                                  |
 | `.gitignore`         | Identifies what to ignore at commit time.                                               |
 | `CODE_OF_CONDUCT.md` | Outlines expectations for participation in Microsoft-managed open source communities.   |
 | `README.md`          | This README file.                                                                       |
