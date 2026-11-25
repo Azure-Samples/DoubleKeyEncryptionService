@@ -1,0 +1,208 @@
+openapi: 3.0.3
+info:
+  title: Double Key Encryption Service API
+  version: 1.0.0
+  description: |
+    REST contract for retrieving a public key and decrypting data with a
+    Double Key Encryption customer key store. Deploy the service behind HTTPS.
+
+    The public key operation is anonymous. The decrypt operation requires a
+    JWT accepted by the service and authorized for the requested key.
+servers:
+  - url: /
+    description: The host on which the Double Key Encryption service is deployed.
+paths:
+  /{keyName}:
+    get:
+      summary: Get the active public key for a key name
+      description: |
+        Returns the active RSA public key. The `kid` value in the response is
+        the URI to which `/decrypt` is appended to decrypt data for that key.
+      operationId: getPublicKey
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/keyName'
+      responses:
+        '200':
+          description: The active public key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /{keyName}/{keyId}/decrypt:
+    post:
+      summary: Decrypt data with a specific key
+      description: |
+        Decrypts the supplied ciphertext. Only `RSA-OAEP-256` is supported.
+        The service authenticates the JWT and then authorizes the caller
+        for the requested key.
+      operationId: decrypt
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/keyName'
+        - $ref: '#/components/parameters/keyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecryptRequest'
+      responses:
+        '200':
+          description: The decrypted data encoded as base64.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecryptResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        An Azure Active Directory JWT for the configured JwtAudience. When a
+        request is unauthenticated, the 401 response describes the resource
+        and authorization endpoints in its authentication headers.
+  parameters:
+    keyName:
+      name: keyName
+      in: path
+      required: true
+      description: The configured name of the customer key.
+      schema:
+        type: string
+        minLength: 1
+    keyId:
+      name: keyId
+      in: path
+      required: true
+      description: The key-version identifier returned as part of `kid`.
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    BadRequest:
+      description: |
+        The key was not found, a required argument is missing, the algorithm is
+        unsupported, or another key-store validation failed.
+    Unauthorized:
+      description: A valid JWT was not provided.
+      headers:
+        WWW-Authenticate:
+          description: |
+            Authentication challenge containing the configured `resource`,
+            `authorization`, and `realm` values.
+          schema:
+            type: string
+        resource:
+          description: The configured audience URI used to acquire a token.
+          schema:
+            type: string
+            format: uri
+        authorization:
+          description: The configured token authorization endpoint.
+          schema:
+            type: string
+            format: uri
+    Forbidden:
+      description: The authenticated caller is not authorized to access the key.
+  schemas:
+    PublicKeyResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - key
+      properties:
+        key:
+          $ref: '#/components/schemas/PublicKey'
+        cache:
+          $ref: '#/components/schemas/PublicKeyCache'
+    PublicKey:
+      type: object
+      additionalProperties: false
+      required:
+        - kty
+        - n
+        - e
+        - alg
+        - kid
+      properties:
+        kty:
+          type: string
+          description: The public key type.
+          enum:
+            - RSA
+        n:
+          type: string
+          format: byte
+          description: The RSA modulus encoded as base64.
+        e:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: The RSA public exponent in base 10.
+          example: 65537
+        alg:
+          type: string
+          description: The algorithm metadata associated with the public key.
+          enum:
+            - RS256
+        kid:
+          type: string
+          format: uri
+          description: |
+            The key URI in the form `https://{host}/{keyName}/{keyId}`. Append
+            `/decrypt` to construct the decrypt endpoint.
+          example: https://dke.example.com/LegalKey/F2DBF8CB-7B06-4ABA-B93A-CACAD13CD7BB
+    PublicKeyCache:
+      type: object
+      additionalProperties: false
+      required:
+        - exp
+      properties:
+        exp:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$'
+          description: |
+            UTC expiration time in `yyyy-MM-ddTHH:mm:ss` format. If this object
+            is omitted, caching of the public key is disabled.
+          example: '2030-11-21T21:15:55'
+    DecryptRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - alg
+        - value
+      properties:
+        alg:
+          type: string
+          description: The algorithm used to encrypt the data.
+          enum:
+            - RSA-OAEP-256
+        value:
+          type: string
+          format: byte
+          description: The encrypted data encoded as base64.
+    DecryptResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          format: byte
+          description: The decrypted data encoded as base64.
